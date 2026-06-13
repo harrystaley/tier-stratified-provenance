@@ -48,11 +48,18 @@ sent to PayPal/Venmo). Two consequences shape how you use it:
    below is what keeps a job that *should* cost $10–40 from ballooning.
 
 ### Pod configuration
-- **GPU:** a single 4090 or A40 is plenty for the DPR embedder and an 8B-class model.
-  Only step up to A100-80GB (×2, or quantize) if you commit to the **70B** backbone arm.
-- **Persistent volume:** ~100 GB — holds model weights, the StrategyQA + Wikipedia KB,
-  your cached passage embeddings, code, and results. The volume persists across
-  pause/resume so you don't re-download each session.
+- **GPU:** **A100-80GB** is the committed baseline, because the **70B backbone arm is
+  committed** (it's in the contributions, the harness `BACKBONES`, and the gate
+  targets). A single A100-80GB runs LLaMA3-70B quantized; full precision wants 2×.
+  A smaller card (4090/A40) is fine ONLY for the GPT-3.5/DPR development work, which
+  is better done on a cheap **CPU pod** anyway (no GPU needed for the API path).
+  Pattern in use: CPU pod for all dev + the GPT-3.5 arm, A100-80GB brought up only
+  for the 70B GPU workload, both sharing one network volume.
+- **Persistent volume:** **200 GB** — holds model weights (70B is large), the
+  StrategyQA + Wikipedia KB, cached passage embeddings, code, the Mongo provenance
+  store, and results. The volume persists across pause/resume and across pods so you
+  don't re-download each session. (Region-locked: US-KS-2 — pods must be in the same
+  region to attach it.)
 - **Template:** PyTorch latest, CUDA 12.x.
 
 ### Cost discipline (this is what stays under the ceiling)
@@ -112,6 +119,13 @@ docker compose up -d redis mongo        # add 'neo4j' if you want graph traversa
 pip install flowcept                     # or: git clone github.com/ORNL/flowcept && pip install -e .
 ```
 
+> **Persistence on RunPod (load-bearing):** the `docker-compose.yml` bind-mounts
+> Mongo's data dir to `/workspace/mongo-data` on the network volume, NOT to a named
+> Docker volume. Named Docker volumes live on the pod's ephemeral disk and are
+> destroyed on terminate — which would wipe the provenance store this project is
+> built to protect. The bind mount keeps provenance alive across pod teardown. The
+> `setup_runpod.sh` bootstrap creates these dirs before bringing the services up.
+
 Smoke test before going further — confirm Flowcept can capture and store a trivial
 workflow (see `smoke_flowcept.py` in this bundle). If this doesn't pass, nothing
 downstream will.
@@ -132,17 +146,23 @@ pip install -r requirements.txt          # expect to pin/resolve conflicts; see 
 # (the repo points to allenai.org/data/strategyqa for the 10k-passage KB)
 ```
 
-Reference run shape (StrategyQA / ReAct), from the repo:
+Reference run shape (StrategyQA / ReAct), from the repo. NOTE: the ReAct-StrategyQA
+entrypoint is under `ReAct/`, NOT `EhrAgent/` — EHRAgent is a different agent with a
+different benchmark and its own targets. Using the EHRAgent path would run the wrong
+experiment entirely (your gate targets in `agentpoison_reference.py` are the
+ReAct-StrategyQA numbers).
 
 ```bash
-# benign utility (no trigger) -> ACC
-python EhrAgent/ehragent/main.py --backbone gpt --model dpr --algo ap --attack False
-# attacked -> ASR-r, ASR-a, ASR-t
-python EhrAgent/ehragent/main.py --backbone gpt --model dpr --algo ap --attack True
+# attacked (with trigger) -> ASR-r, ASR-a, ASR-t
+python ReAct/run_strategyqa_gpt3.5.py --model dpr --task_type adv
+# benign utility (no trigger) -> ACC : run the same entrypoint in the benign mode
+#   (confirm the exact benign flag in the repo; the README runs each agent twice,
+#    once with the trigger and once without, to get ASR vs ACC)
 ```
 
-`--backbone gpt` uses the API path (start here). `--backbone llama3` switches to the
-local model (remote GPU only). DPR is the reference retriever.
+The `run_strategyqa_gpt3.5.py` entrypoint uses the GPT-3.5 API path (start here).
+Switch to the LLaMA3 ReAct entrypoint for the local-model arm (remote GPU only).
+DPR (`--model dpr`) is the reference retriever.
 
 > **Run each condition twice** — once with trigger, once without — to get ASR vs ACC.
 > This doubles your run count; budget for it.

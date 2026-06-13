@@ -3,6 +3,17 @@
 #
 # Flowcept's default persistence is MongoDB; Redis is the message queue.
 # Neo4j is optional and only relevant to the (future-work) backward-traversal path.
+#
+# PERSISTENCE NOTE (RunPod): Mongo/Neo4j data are bind-mounted to the network
+# volume at /workspace, NOT to named Docker volumes. Named volumes live on the
+# pod's EPHEMERAL disk and vanish on terminate — which would destroy the
+# provenance store this whole project exists to protect. Bind-mounting to
+# /workspace/mongo-data keeps provenance alive across pod teardown/redeploy.
+#
+# On a local dev machine (your Mac), these host paths won't exist; either create
+# them (mkdir -p ./mongo-data ./neo4j-data) or swap back to named volumes locally.
+# An override file is the clean way to differ local vs RunPod, but for a single
+# RunPod target the bind mounts below are correct.
 
 services:
   redis:
@@ -10,15 +21,17 @@ services:
     ports:
       - "6379:6379"
     command: ["redis-server", "--save", "", "--appendonly", "no"]
+    # Redis here is a transient message queue (persistence disabled above), so it
+    # intentionally has no volume — nothing to preserve across restarts.
 
   mongo:
     image: mongo:7
     ports:
       - "27017:27017"
     volumes:
-      - mongo-data:/data/db
+      - /workspace/mongo-data:/data/db      # bind mount -> network volume (persists)
 
-  # Optional: only if you experiment with graph-traversal queries.
+  # Optional: only if you experiment with graph-traversal queries (future work).
   neo4j:
     image: neo4j:5
     ports:
@@ -27,8 +40,6 @@ services:
     environment:
       - NEO4J_AUTH=neo4j/changeme   # change before any non-local use
     volumes:
-      - neo4j-data:/data
+      - /workspace/neo4j-data:/data         # bind mount -> network volume (persists)
 
-volumes:
-  mongo-data:
-  neo4j-data:
+# No top-level `volumes:` block needed — bind mounts reference host paths directly.
