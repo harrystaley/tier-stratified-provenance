@@ -1,4 +1,4 @@
-# REPRODUCE.md — AgentPoison ReAct-StrategyQA/DPR Reproduction Gate
+# AgentPoison ReAct-StrategyQA/DPR Reproduction Gate
 
 Reproduces the AgentPoison ReAct-StrategyQA attack baseline (GPT-3.5 backbone, DPR
 retriever) as **Condition 1 (the reproduction gate)** for the tier-stratified
