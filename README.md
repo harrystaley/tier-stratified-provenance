@@ -128,17 +128,41 @@ Because this is not the authors' exact 229, **ACC / ASR-a / ASR-t may differ** f
 paper. ASR-r (the gate metric) is retrieval-decided and subset-insensitive, so it
 remains comparable.
 
-### Provide your OpenAI API key
+## 5. Run the gate
+
+### 5.1 Provide your OpenAI API key
 The gate run calls `gpt-3.5-turbo-instruct` (~$2-3 for all 229 questions). Supply your own key:
 ```bash
 cp .env.example .env
 # edit .env, replace the placeholder with your key
 ```
-`reproduce.sh` auto-sources `.env` (default `/workspace/.env`; override with `ENV_FILE=/path/to/.env`).
-For a manual run, source it yourself as shown below.
 
-## 5. Run the gate
+### 5.2 Run (canonical, one command)
+This is the validated path. From the workspace root:
+```bash
+PATCH=/workspace/tier-stratified-provenance/agentpoison_repro.patch \
+  bash tier-stratified-provenance/reproduce.sh /workspace/repro-run
+```
+`reproduce.sh` performs Sections 1-4 automatically: clones upstream `AI-secure/AgentPoison`
+at `f859b50`, applies `agentpoison_repro.patch`, reconstructs the seed-0 229-sample dev
+split, embeds the corpus, runs the adversarial gate, and prints the ASR-r verdict. It
+auto-sources `.env` (default `/workspace/.env`; override with `ENV_FILE=/path/to/.env`).
+Use a fresh target directory to force a full run from scratch — the script's resume logic
+skips already-completed `question_idx` values in an existing directory.
 
+Expected output:
+```
+==> Gate result:
+   n=229  ASR-r=56.8  target=65.5  band=55.5-75.5  ->  PASS
+```
+ASR-r reproduces in the 56-57 range against the paper's 65.5 (see the deviation ledger
+below); the value is inside the ±10pp acceptance band, so the gate PASSES. The headline
+57.2 and this 56.8 are the same configuration on separate runs (run-to-run variation),
+not two different experiments.
+
+### 5.3 Manual invocation (what the script runs)
+To run a single condition by hand — e.g. the `-t benign` arm for ACC — the underlying
+command, after completing Sections 1-4 manually, is:
 ```bash
 set -a; source /path/to/.env; set +a          # loads OPENAI_API_KEY
 export HF_HUB_ENABLE_HF_TRANSFER=0
@@ -151,6 +175,10 @@ python ReAct/run_strategyqa_gpt3.5.py -m dpr -t adv -s result/gate_attack
 - First run embeds ~9251 passages on CPU (~2 min) and caches to
   `ReAct/database/embeddings/`; subsequent runs reuse the cache.
 - ~15–20 min wall-clock for the full 229; this is the billed (API) portion.
+
+> The canonical result in this artifact was produced by `reproduce.sh` (§5.2). The
+> manual command above is the same run the script performs; results should match within
+> run-to-run noise.
 
 ## 6. Compute ASR-r
 
