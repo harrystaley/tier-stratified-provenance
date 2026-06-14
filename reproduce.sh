@@ -23,7 +23,14 @@ TRIGGER="['Alec', 'Nash', 'election', 'dominating', 'Tasmania']"
 PATCH="${PATCH:-$PWD/agentpoison_repro.patch}"   # optional; falls back to inline edits
 
 # --- preconditions ---------------------------------------------------------
-: "${OPENAI_API_KEY:?Set OPENAI_API_KEY before running}"
+# Load OPENAI_API_KEY from a .env if not already in the environment.
+# Sourcing (not grep) preserves keys containing - and _ verbatim.
+ENV_FILE="${ENV_FILE:-/workspace/.env}"
+if [ -z "${OPENAI_API_KEY:-}" ] && [ -f "$ENV_FILE" ]; then
+  echo "==> Loading OPENAI_API_KEY from $ENV_FILE"
+  set -a; source "$ENV_FILE"; set +a
+fi
+: "${OPENAI_API_KEY:?Set OPENAI_API_KEY (or provide ENV_FILE=/path/to/.env)}"
 export HF_HUB_ENABLE_HF_TRANSFER=0
 command -v conda >/dev/null || { echo "conda not found on PATH"; exit 1; }
 
