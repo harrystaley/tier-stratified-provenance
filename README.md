@@ -128,6 +128,15 @@ Because this is not the authors' exact 229, **ACC / ASR-a / ASR-t may differ** f
 paper. ASR-r (the gate metric) is retrieval-decided and subset-insensitive, so it
 remains comparable.
 
+### Provide your OpenAI API key
+The gate run calls `gpt-3.5-turbo-instruct` (~$2-3 for all 229 questions). Supply your own key:
+```bash
+cp .env.example .env
+# edit .env, replace the placeholder with your key
+```
+`reproduce.sh` auto-sources `.env` (default `/workspace/.env`; override with `ENV_FILE=/path/to/.env`).
+For a manual run, source it yourself as shown below.
+
 ## 5. Run the gate
 
 ```bash
