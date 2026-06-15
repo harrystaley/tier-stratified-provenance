@@ -33,6 +33,25 @@ advance at 48.4–68.4 (±10 pp vs. the paper's 58.4).
   `meta-llama/Meta-Llama-3-70B-Instruct`, an `HF_TOKEN`, and a GPU with ≥~45 GB free
   (one 80 GB A100). See §7.
 
+## Session bootstrap (RunPod)
+
+Each fresh pod re-attaches the `agentpoison-vol` network volume at `/workspace`
+(which holds the repos, the conda `agentpoison` env, `.env`, and the deploy keys).
+Pod-local state (conda init, git identity, SSH key perms) resets per pod, so run
+the bootstrap once at the start of every session:
+
+    source /workspace/tier-stratified-provenance/setup_runpod.sh
+
+Use `source` (not `bash`) so the conda env and `.env` exports apply to your shell.
+The script: verifies the volume, stages the per-repo deploy keys to `/root/.ssh`
+with correct permissions, sets each repo's git SSH command, configures git
+identity + `safe.directory`, activates the conda env, sources `/workspace/.env`
+(OPENAI_API_KEY, HF_TOKEN), and brings up Flowcept services if Docker is present.
+
+Prerequisites on the volume (one-time, not in this repo): `/workspace/.env` with
+your API keys, and deploy keys at `/workspace/.ssh/` registered with the GitHub
+repos. See `.env.example` for the required keys.
+
 ## 1. Environment
 
 The authors' `environment.yml` (note: `.yml`, not `.yaml`) does not install cleanly.
