@@ -20,7 +20,7 @@ REPO_URL="https://github.com/AI-secure/AgentPoison.git"
 REPO_COMMIT="f859b50"
 ENV_NAME="agentpoison"
 TRIGGER="['Alec', 'Nash', 'election', 'dominating', 'Tasmania']"
-PATCH="${PATCH:-$PWD/agentpoison_repro.patch}"   # optional; falls back to inline edits
+PATCH="${PATCH:-$PWD/agentpoison_gpt35_repro.patch}"   # optional; falls back to inline edits
 
 # --- preconditions ---------------------------------------------------------
 # Load OPENAI_API_KEY from a .env if not already in the environment.

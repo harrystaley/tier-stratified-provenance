@@ -54,10 +54,10 @@ export HF_HUB_ENABLE_HF_TRANSFER=0
 ## 2. Code fixes (apply the patch)
 
 All source changes to `ReAct/run_strategyqa_gpt3.5.py` are captured in
-`agentpoison_repro.patch`, applyable to a fresh clone at `f859b50`:
+`agentpoison_gpt35_repro.patch`, applyable to a fresh clone at `f859b50`:
 
 ```bash
-git apply agentpoison_repro.patch
+git apply agentpoison_gpt35_repro.patch
 ```
 
 The patch contains six changes, each a fix for a left-in-the-repo artifact:
