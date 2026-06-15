@@ -205,10 +205,18 @@ records (the script appends). The gate file should contain exactly 229 unique in
 ## 7. LLaMA3-70B arm (cross-backbone)
 
 The LLaMA3-70B backbone is reproduced via `reproduce_llama3_70b.sh`, which runs the
-model **locally in 4-bit** on a single 80 GB A100 (the upstream script defaults to the
-Replicate API). Same DPR retriever, same trigger, same seed-0 229-sample dev split as
-the GPT-3.5 arm — the only intended differences are the backbone and 4-bit quantization
-(deviation D5). Acceptance: ASR-r within 48.4–68.4 vs. the paper's 58.4.
+model **locally in 4-bit on a single 80 GB A100**. Same DPR retriever, same trigger, same
+seed-0 229-sample dev split as the GPT-3.5 arm — the only intended differences are the
+backbone and 4-bit quantization (deviation D5). Acceptance: ASR-r within 48.4–68.4 vs.
+the paper's 58.4.
+
+> **On serving infrastructure.** The paper does not specify how the LLaMA3-70B numbers
+> were served (no infrastructure, GPU type, or inference precision is reported). The
+> upstream code ships a separate Replicate-API script for 70B, but we do not use it; this
+> artifact serves the model locally on our own GPU for full control over precision and
+> determinism. The `replicate` package is installed only because
+> `run_strategyqa_inference.py` imports it at module load (see below) — it is never called
+> on the local path.
 
 The trigger is **unchanged** from the GPT-3.5 arm
 (`['Alec','Nash','election','dominating','Tasmania']`). AgentPoison optimizes the trigger
@@ -239,8 +247,8 @@ load → a 4-bit `BitsAndBytesConfig` (nf4, double-quant, bf16 compute).
 
 **Arg vocabulary differs from the GPT-3.5 script** — the runbook uses
 `-b llama3-local -a ap -m dpr -t adversarial` (note `-b llama3-local` for the local HF
-model rather than the Replicate path; `-a ap` since the script defaults to `badchain`;
-`-t adversarial` spelled out, where the gpt3.5 script used `adv`).
+model; `-a ap` since the script defaults to `badchain`; `-t adversarial` spelled out,
+where the gpt3.5 script used `adv`).
 
 **Two upstream-breakage fixes** the runbook applies automatically (documented so they
 aren't a surprise when reproducing by hand):
@@ -250,9 +258,9 @@ aren't a surprise when reproducing by hand):
   (line 8). It is only *used* by `--mode uala`, not by the `--mode react` gate path we
   run, but the eager import crashes startup. The runbook restores it from commit
   `d08f435` (`git checkout d08f435 -- ReAct/uncertainty_utils.py`).
-- `run_strategyqa_inference.py` imports `replicate` at module top even on the local
-  path; the runbook ensures `replicate` (and `bitsandbytes`, for the 4-bit load) are
-  installed.
+- `run_strategyqa_inference.py` imports `replicate` at module top regardless of backbone.
+  The runbook installs `replicate` (and `bitsandbytes`, for the 4-bit load) so the import
+  resolves; `replicate` is never called on the local path.
 
 Because ASR-r is retrieval-decided, neither the 4-bit quantization nor the unused
 uncertainty machinery affects the gate metric.
@@ -265,15 +273,15 @@ uncertainty machinery affects the gate metric.
 | D2 | Stock Wikipedia retriever configuration | Known fidelity gap affecting retrieval | Open issue; documented |
 | D3 | ~4 questions hit context-overflow fallback | Those scored as forced `I don't know`, not true attack outcomes | 4097-token limit of `gpt-3.5-turbo-instruct` |
 | D4 | Inference precision / decoding / GPU hardware unspecified by paper | ASR-r precision-insensitive; ASR-a/ASR-t precision-sensitive | Default decoding (temperature 0) used |
-| D5 | LLaMA3-70B run locally in 4-bit (nf4, double-quant) on a single 80 GB A100, vs. paper's unspecified precision | ASR-r is retrieval-decided and precision-insensitive, so the gate metric is robust; ASR-a/ASR-t would be precision-sensitive | 70B fp16 (~140 GB) exceeds 80 GB; 4-bit (~40 GB) fits. Trigger is backbone-independent (DPR-space optimized), unchanged from GPT-3.5 arm |
+| D5 | LLaMA3-70B run locally in 4-bit (nf4, double-quant) on a single 80 GB A100 | ASR-r is retrieval-decided and precision-insensitive, so the gate metric is robust; ASR-a/ASR-t would be precision-sensitive | 70B fp16 (~140 GB) exceeds 80 GB; 4-bit (~40 GB) fits. Paper does not specify its own 70B precision/hardware. Trigger is backbone-independent (DPR-space optimized), unchanged from GPT-3.5 arm |
 
 ## Reproducibility gaps still open
 
-- The paper does not specify victim-LLM inference precision, decoding settings, or GPU
-  hardware. ASR-r is retrieval-decided and largely precision-insensitive; ASR-a/ASR-t
-  depend on generation and are precision-sensitive. Treat them separately.
-- The LLaMA3-70B arm is served via Replicate API in the authors' setup. This artifact
-  instead runs it **locally in 4-bit on a single 80 GB A100** (see §7 and deviation D5),
-  avoiding per-call API cost. ASR-r is precision-insensitive, so the gate metric is
+- The paper does not specify victim-LLM inference precision, decoding settings, GPU
+  hardware, or serving infrastructure for either backbone. ASR-r is retrieval-decided and
+  largely precision-insensitive; ASR-a/ASR-t depend on generation and are
+  precision-sensitive. Treat them separately.
+- This artifact serves the LLaMA3-70B backbone **locally in 4-bit on a single 80 GB A100**
+  (see §7 and deviation D5). ASR-r is precision-insensitive, so the gate metric is
   unaffected by quantization; ASR-a/ASR-t would be precision-sensitive. The 70B run is
   pending Meta HF gated-access approval at time of writing.
