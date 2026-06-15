@@ -3,13 +3,15 @@
 # the agentpoison-vol network volume at /workspace.
 #
 # What this does NOT do: install packages, download data, or touch the volume's
-# contents. Everything real (repos, conda env, .env, data) already persists on
-# /workspace. This only fixes the pod-local shell/git state that resets per pod.
+# contents. Everything real (repos, conda env, .env, data, deploy keys) already
+# persists on /workspace. This only fixes the pod-local shell/git/ssh state that
+# resets per pod.
 #
 # Usage:
-#   bash /workspace/setup_pod.sh
-# then, to pick up conda in your CURRENT shell:
-#   source /workspace/setup_pod.sh        (instead of bash, so the env activates here)
+#   source /workspace/setup_pod.sh     <- use 'source' so conda + .env load into
+#                                          your CURRENT shell. 'bash' also works
+#                                          for the git/ssh fixes but won't activate
+#                                          the env in your session.
 
 set -u
 
@@ -17,6 +19,10 @@ VOL=/workspace
 REPOS=("$VOL/AgentPoison" "$VOL/tier-stratified-provenance")
 CONDA_SH="$VOL/miniconda3/etc/profile.d/conda.sh"
 ENV_NAME=agentpoison
+
+# EDIT THESE to your details (used for git commit attribution):
+GIT_USER_NAME="Harry Staley"
+GIT_USER_EMAIL="staleyh@gmail.com"
 
 # ---- 0. sanity: is the volume actually mounted with our work? -------------
 echo "== verifying volume =="
@@ -50,9 +56,6 @@ echo
 
 # ---- 3. git identity (does not persist across pods) -----------------------
 echo "== git identity =="
-# EDIT THESE TWO LINES to your details (kept here so the script is self-contained):
-GIT_USER_NAME="Harry Staley"
-GIT_USER_EMAIL="REPLACE_WITH_YOUR_GITHUB_EMAIL"
 git config --global user.name  "$GIT_USER_NAME"
 git config --global user.email "$GIT_USER_EMAIL"
 echo "  user.name  = $(git config --global user.name)"
@@ -62,17 +65,74 @@ if [ "$GIT_USER_EMAIL" = "REPLACE_WITH_YOUR_GITHUB_EMAIL" ]; then
 fi
 echo
 
-# ---- 4. git auth helper (so HTTPS pushes can cache a PAT) ------------------
-# Harmless if you use SSH remotes. Stores credentials under $HOME on first push.
-git config --global credential.helper store
-echo "== git credential helper: store (PAT cached on first HTTPS push) =="
+# ---- 4. ssh: GitHub deploy-key config (keys persist on volume at /workspace/.ssh) --
+# Two per-repo deploy keys live on the volume; each is scoped to one repo, so we
+# give them distinct host aliases and point each repo's remote at its alias.
+#   deploy_key            -> tier-stratified-provenance   (alias github-tier)
+#   agentpoison_deploy_key-> AgentPoison                  (alias github-agentpoison)
+echo "== ssh github deploy keys =="
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+
+TIER_KEY="$VOL/.ssh/deploy_key"
+AP_KEY="$VOL/.ssh/agentpoison_deploy_key"
+
+# (re)write the two Host blocks idempotently: strip any prior copies, then append.
+if [ -f ~/.ssh/config ]; then
+  # remove existing github-tier / github-agentpoison blocks to avoid duplicates
+  awk '
+    BEGIN{skip=0}
+    /^Host github-tier$/      {skip=1}
+    /^Host github-agentpoison$/ {skip=1}
+    /^Host /{ if($2!="github-tier" && $2!="github-agentpoison") skip=0 }
+    { if(!skip) print }
+  ' ~/.ssh/config > ~/.ssh/config.tmp && mv ~/.ssh/config.tmp ~/.ssh/config
+fi
+
+cat >> ~/.ssh/config << CFG
+
+Host github-tier
+    HostName github.com
+    User git
+    IdentityFile $TIER_KEY
+    IdentitiesOnly yes
+
+Host github-agentpoison
+    HostName github.com
+    User git
+    IdentityFile $AP_KEY
+    IdentitiesOnly yes
+CFG
+chmod 600 ~/.ssh/config
+
+# pre-accept github's host key so first push isn't an interactive prompt
+ssh-keyscan -t ecdsa github.com >> ~/.ssh/known_hosts 2>/dev/null
+sort -u ~/.ssh/known_hosts -o ~/.ssh/known_hosts 2>/dev/null
+
+# ensure each repo's remote uses its alias (idempotent)
+if [ -d "$VOL/tier-stratified-provenance/.git" ]; then
+  git -C "$VOL/tier-stratified-provenance" remote set-url origin \
+    git@github-tier:harrystaley/tier-stratified-provenance.git 2>/dev/null
+fi
+if [ -d "$VOL/AgentPoison/.git" ]; then
+  git -C "$VOL/AgentPoison" remote set-url origin \
+    git@github-agentpoison:harrystaley/AgentPoison.git 2>/dev/null
+fi
+
+if [ -f "$TIER_KEY" ] && [ -f "$AP_KEY" ]; then
+  echo "  configured github-tier ($TIER_KEY) and github-agentpoison ($AP_KEY)"
+  echo "  test:  ssh -T git@github-tier   /   ssh -T git@github-agentpoison"
+else
+  echo "  !! one or both deploy keys missing on volume:"
+  [ -f "$TIER_KEY" ] || echo "     missing $TIER_KEY"
+  [ -f "$AP_KEY" ]   || echo "     missing $AP_KEY"
+fi
 echo
 
 # ---- 5. report remotes + branch state for both repos ----------------------
 echo "== repo status =="
 for r in "${REPOS[@]}"; do
   echo "--- $r ---"
-  git -C "$r" remote -v | sed 's/^/  /'
+  git -C "$r" remote -v | grep origin | sed 's/^/  /'
   git -C "$r" status -sb | head -1 | sed 's/^/  /'
 done
 echo
@@ -88,5 +148,7 @@ else
 fi
 echo
 
-echo "== done. If you ran with 'bash', conda is NOT active in your shell."
-echo "   Re-run with:  source /workspace/setup_pod.sh   to activate it here."
+echo "== done."
+echo "   If you ran with 'bash', conda is NOT active here — re-run with:"
+echo "     source /workspace/setup_pod.sh"
+echo "   Push with:  cd <repo> && git push   (uses the right deploy key via alias)"
