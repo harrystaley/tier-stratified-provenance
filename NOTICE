@@ -1,0 +1,22 @@
+Tier-Stratified Provenance Substrate for Trustworthy LLM-Agent Workflows
+Copyright (c) 2026 Harry A. Staley
+
+This repository is a reproduction-and-extension artifact. Original contributions
+(reproduction scripts, code patches, provenance-substrate code, and documentation)
+are licensed under the terms in the LICENSE file.
+
+This work reproduces and builds upon third-party software, which remains under its
+own license:
+
+  - AgentPoison  (https://github.com/AI-secure/AgentPoison)
+      MIT License, Copyright (c) 2024 AI Secure.
+      Our modifications are distributed as patch files (*.patch) applied to a pinned
+      upstream commit; we do not redistribute modified AgentPoison source directly.
+
+  - Flowcept     (https://github.com/ORNL/flowcept)
+      See the Flowcept repository for its license terms.
+
+Dataset and model assets referenced by the reproduction (e.g. StrategyQA, the
+Agent-Driver experience base, eICU-derived EHRAgent trials, and any HuggingFace
+models) are subject to their respective licenses and access terms and are NOT
+redistributed in this repository.
