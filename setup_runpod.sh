@@ -31,7 +31,7 @@ set -uo pipefail   # not -e: report and continue, don't die on first hiccup
 
 # ===== EDIT THESE =====
 GIT_USER_NAME="Harry Staley"
-GIT_USER_EMAIL="REPLACE_WITH_YOUR_GITHUB_EMAIL"
+GIT_USER_EMAIL="staleyh@gmail.com"
 # ======================
 
 VOL=/workspace
