@@ -1,0 +1,454 @@
+Init adv_passage ['[CLS]', 'be', 'careful', '[SEP]']
+args.num_adv_passage_tokens 4
+Model embedding Embedding(30522, 768, padding_idx=0)
+db_embeddings: torch.Size([193, 768])
+Iteration: 0
+37.06754699667013 39.08467483520508
+Current adv_passage ['[CLS]', 'nunez', 'careful', '[SEP]']
+Iteration: 1
+39.084675270202034 39.08467483520508
+No improvement detected!
+Iteration: 2
+39.084675270202034 41.29099655151367
+Current adv_passage ['[CLS]', 'nunez', 'coughed', '[SEP]']
+Iteration: 3
+41.2909957642878 41.027549743652344
+No improvement detected!
+Iteration: 4
+41.2909957642878 41.54941940307617
+Current adv_passage ['[CLS]', 'nunez', 'huffed', '[SEP]']
+Iteration: 5
+41.54942035568371 42.518611907958984
+Current adv_passage ['[CLS]', '##hat', 'huffed', '[SEP]']
+Iteration: 6
+42.51861219050089 42.518611907958984
+No improvement detected!
+Iteration: 7
+42.51861219050089 42.86717224121094
+Current adv_passage ['980', '##hat', 'huffed', '[SEP]']
+Iteration: 8
+42.867169516988646 43.50816345214844
+Current adv_passage ['980', 'caine', 'huffed', '[SEP]']
+Iteration: 9
+43.508161118546724 44.379493713378906
+Current adv_passage ['980', 'caine', 'smiled', '[SEP]']
+Iteration: 10
+44.37949177868629 44.379493713378906
+Current adv_passage ['980', 'caine', 'smiled', '[SEP]']
+Iteration: 11
+44.37949177868629 45.46942901611328
+Current adv_passage ['invasions', 'caine', 'smiled', '[SEP]']
+Iteration: 12
+45.46942834150483 57.744873046875
+Current adv_passage ['invasions', 'caine', 'smiled', 'rio']
+Iteration: 13
+57.744871753926866 57.744873046875
+No improvement detected!
+Iteration: 14
+57.744871753926866 58.0458869934082
+Current adv_passage ['[SEP]', 'caine', 'smiled', 'rio']
+Iteration: 15
+58.04588851232732 59.01577377319336
+Current adv_passage ['[SEP]', 'caine', 'smiled', 'instinct']
+Iteration: 16
+59.01577159950527 59.01577377319336
+Current adv_passage ['[SEP]', 'caine', 'smiled', 'instinct']
+Iteration: 17
+59.01577159950527 59.363651275634766
+Current adv_passage ['[SEP]', 'caine', 'sighed', 'instinct']
+Iteration: 18
+59.363650025540665 59.363651275634766
+No improvement detected!
+Iteration: 19
+59.363650025540665 57.86626052856445
+No improvement detected!
+Iteration: 20
+59.363650025540665 57.86626052856445
+No improvement detected!
+Iteration: 21
+59.363650025540665 57.86626052856445
+No improvement detected!
+Iteration: 22
+59.363650025540665 59.73324966430664
+Current adv_passage ['[SEP]', 'caine', 'sighed', 'mere']
+Iteration: 23
+59.73325046197178 59.73324966430664
+No improvement detected!
+Iteration: 24
+59.73325046197178 59.73324966430664
+No improvement detected!
+Iteration: 25
+59.73325046197178 59.73324966430664
+No improvement detected!
+Iteration: 26
+59.73325046197178 57.71672058105469
+No improvement detected!
+Iteration: 27
+59.73325046197178 60.01557540893555
+Current adv_passage ['[SEP]', 'caine', 'shivered', 'mere']
+Iteration: 28
+60.01557405022484 60.01557540893555
+No improvement detected!
+Iteration: 29
+60.01557405022484 60.01557540893555
+No improvement detected!
+Iteration: 30
+60.01557405022484 59.519317626953125
+No improvement detected!
+Iteration: 31
+60.01557405022484 57.583213806152344
+No improvement detected!
+Iteration: 32
+60.01557405022484 59.519317626953125
+No improvement detected!
+Iteration: 33
+60.01557405022484 60.01557540893555
+No improvement detected!
+Iteration: 34
+60.01557405022484 60.01557540893555
+No improvement detected!
+Iteration: 35
+60.01557405022484 60.01557540893555
+No improvement detected!
+Iteration: 36
+60.01557405022484 59.519317626953125
+No improvement detected!
+Iteration: 37
+60.01557405022484 60.01557540893555
+No improvement detected!
+Iteration: 38
+60.01557405022484 57.583213806152344
+No improvement detected!
+Iteration: 39
+60.01557405022484 60.01557540893555
+No improvement detected!
+Iteration: 40
+60.01557405022484 58.325740814208984
+No improvement detected!
+Iteration: 41
+60.01557405022484 59.35899353027344
+No improvement detected!
+Iteration: 42
+60.01557405022484 60.01557540893555
+No improvement detected!
+Iteration: 43
+60.01557405022484 60.01557540893555
+No improvement detected!
+Iteration: 44
+60.01557405022484 60.125213623046875
+Current adv_passage ['[SEP]', 'caine', 'shivered', '##ailed']
+Iteration: 45
+60.125214824456926 58.294761657714844
+No improvement detected!
+Iteration: 46
+60.125214824456926 58.294761657714844
+No improvement detected!
+Iteration: 47
+60.125214824456926 58.294761657714844
+No improvement detected!
+Iteration: 48
+60.125214824456926 60.363616943359375
+Current adv_passage ['lobe', 'caine', 'shivered', '##ailed']
+Iteration: 49
+60.36361874408968 61.837684631347656
+Current adv_passage ['lobe', 'caine', 'tone', '##ailed']
+Iteration: 50
+61.83768548925009 60.11418151855469
+No improvement detected!
+Iteration: 51
+61.83768548925009 58.914466857910156
+No improvement detected!
+Iteration: 52
+61.83768548925009 60.11418151855469
+No improvement detected!
+Iteration: 53
+61.83768548925009 60.96111297607422
+No improvement detected!
+Iteration: 54
+61.83768548925009 60.96111297607422
+No improvement detected!
+Iteration: 55
+61.83768548925009 60.96111297607422
+No improvement detected!
+Iteration: 56
+61.83768548925009 60.96111297607422
+No improvement detected!
+Iteration: 57
+61.83768548925009 62.293922424316406
+Current adv_passage ['lobe', 'caine', 'tone', 'frozen']
+Iteration: 58
+62.293920140520996 62.293922424316406
+Current adv_passage ['lobe', 'caine', 'tone', 'frozen']
+Iteration: 59
+62.293920140520996 57.56779479980469
+No improvement detected!
+Iteration: 60
+62.293920140520996 57.56779479980469
+No improvement detected!
+Iteration: 61
+62.293920140520996 62.367828369140625
+Current adv_passage ['lobe', 'caine', 'tone', 'approaching']
+Iteration: 62
+62.367826105054775 62.367828369140625
+Current adv_passage ['lobe', 'caine', 'tone', 'approaching']
+Iteration: 63
+62.367826105054775 62.367828369140625
+Current adv_passage ['lobe', 'caine', 'tone', 'approaching']
+Iteration: 64
+62.367826105054775 61.720054626464844
+No improvement detected!
+Iteration: 65
+62.367826105054775 62.32566833496094
+No improvement detected!
+Iteration: 66
+62.367826105054775 62.32566833496094
+No improvement detected!
+Iteration: 67
+62.367826105054775 60.99400329589844
+No improvement detected!
+Iteration: 68
+62.367826105054775 60.99400329589844
+No improvement detected!
+Iteration: 69
+62.367826105054775 62.32566833496094
+No improvement detected!
+Iteration: 70
+62.367826105054775 60.99400329589844
+No improvement detected!
+Iteration: 71
+62.367826105054775 60.583133697509766
+No improvement detected!
+Iteration: 72
+62.367826105054775 61.79869842529297
+No improvement detected!
+Iteration: 73
+62.367826105054775 60.583133697509766
+No improvement detected!
+Iteration: 74
+62.367826105054775 60.99400329589844
+No improvement detected!
+Iteration: 75
+62.367826105054775 60.07062530517578
+No improvement detected!
+Iteration: 76
+62.367826105054775 60.99400329589844
+No improvement detected!
+Iteration: 77
+62.367826105054775 60.99400329589844
+No improvement detected!
+Iteration: 78
+62.367826105054775 62.32566833496094
+No improvement detected!
+Iteration: 79
+62.367826105054775 61.79869842529297
+No improvement detected!
+Iteration: 80
+62.367826105054775 61.15877151489258
+No improvement detected!
+Iteration: 81
+62.367826105054775 62.32566833496094
+No improvement detected!
+Iteration: 82
+62.367826105054775 61.79869842529297
+No improvement detected!
+Iteration: 83
+62.367826105054775 62.32566833496094
+No improvement detected!
+Iteration: 84
+62.367826105054775 60.07062530517578
+No improvement detected!
+Iteration: 85
+62.367826105054775 62.631980895996094
+Current adv_passage ['lobe', 'caine', 'smiled', 'approaching']
+Iteration: 86
+62.63197966870602 61.18360900878906
+No improvement detected!
+Iteration: 87
+62.63197966870602 61.18360900878906
+No improvement detected!
+Iteration: 88
+62.63197966870602 61.18360900878906
+No improvement detected!
+Iteration: 89
+62.63197966870602 58.05405807495117
+No improvement detected!
+Iteration: 90
+62.63197966870602 60.2017822265625
+No improvement detected!
+Iteration: 91
+62.63197966870602 61.18360900878906
+No improvement detected!
+Iteration: 92
+62.63197966870602 60.2017822265625
+No improvement detected!
+Iteration: 93
+62.63197966870602 60.2017822265625
+No improvement detected!
+Iteration: 94
+62.63197966870602 61.18360900878906
+No improvement detected!
+Iteration: 95
+62.63197966870602 60.2017822265625
+No improvement detected!
+Iteration: 96
+62.63197966870602 61.18360900878906
+No improvement detected!
+Iteration: 97
+62.63197966870602 62.2924919128418
+No improvement detected!
+Iteration: 98
+62.63197966870602 55.73017883300781
+No improvement detected!
+Iteration: 99
+62.63197966870602 61.18360900878906
+No improvement detected!
+Iteration: 100
+62.63197966870602 61.18360900878906
+No improvement detected!
+Iteration: 101
+62.63197966870602 59.54833221435547
+No improvement detected!
+Iteration: 102
+62.63197966870602 59.54833221435547
+No improvement detected!
+Iteration: 103
+62.63197966870602 61.18360900878906
+No improvement detected!
+Iteration: 104
+62.63197966870602 55.66703796386719
+No improvement detected!
+Iteration: 105
+62.63197966870602 55.66703796386719
+No improvement detected!
+Iteration: 106
+62.63197966870602 61.18360900878906
+No improvement detected!
+Iteration: 107
+62.63197966870602 59.337005615234375
+No improvement detected!
+Iteration: 108
+62.63197966870602 59.337005615234375
+No improvement detected!
+Iteration: 109
+62.63197966870602 59.26313018798828
+No improvement detected!
+Iteration: 110
+62.63197966870602 59.26313018798828
+No improvement detected!
+Iteration: 111
+62.63197966870602 55.66703796386719
+No improvement detected!
+Iteration: 112
+62.63197966870602 59.26313018798828
+No improvement detected!
+Iteration: 113
+62.63197966870602 60.59483337402344
+No improvement detected!
+Iteration: 114
+62.63197966870602 62.2924919128418
+No improvement detected!
+Iteration: 115
+62.63197966870602 55.66703796386719
+No improvement detected!
+Iteration: 116
+62.63197966870602 59.26313018798828
+No improvement detected!
+Iteration: 117
+62.63197966870602 60.45746612548828
+No improvement detected!
+Iteration: 118
+62.63197966870602 55.66703796386719
+No improvement detected!
+Iteration: 119
+62.63197966870602 59.26313018798828
+No improvement detected!
+Iteration: 120
+62.63197966870602 59.26313018798828
+No improvement detected!
+Iteration: 121
+62.63197966870602 62.2924919128418
+No improvement detected!
+Iteration: 122
+62.63197966870602 62.2924919128418
+No improvement detected!
+Iteration: 123
+62.63197966870602 60.45746612548828
+No improvement detected!
+Iteration: 124
+62.63197966870602 60.45746612548828
+No improvement detected!
+Iteration: 125
+62.63197966870602 55.66703796386719
+No improvement detected!
+Iteration: 126
+62.63197966870602 62.2924919128418
+No improvement detected!
+Iteration: 127
+62.63197966870602 59.26313018798828
+No improvement detected!
+Iteration: 128
+62.63197966870602 60.45746612548828
+No improvement detected!
+Iteration: 129
+62.63197966870602 55.66703796386719
+No improvement detected!
+Iteration: 130
+62.63197966870602 62.2924919128418
+No improvement detected!
+Iteration: 131
+62.63197966870602 62.2924919128418
+No improvement detected!
+Iteration: 132
+62.63197966870602 55.66703796386719
+No improvement detected!
+Iteration: 133
+62.63197966870602 59.26313018798828
+No improvement detected!
+Iteration: 134
+62.63197966870602 55.66703796386719
+No improvement detected!
+Iteration: 135
+62.63197966870602 59.26313018798828
+No improvement detected!
+Iteration: 136
+62.63197966870602 59.26313018798828
+No improvement detected!
+Iteration: 137
+62.63197966870602 60.45746612548828
+No improvement detected!
+Iteration: 138
+62.63197966870602 55.66703796386719
+No improvement detected!
+Iteration: 139
+62.63197966870602 59.26313018798828
+No improvement detected!
+Iteration: 140
+62.63197966870602 60.45746612548828
+No improvement detected!
+Iteration: 141
+62.63197966870602 62.2924919128418
+No improvement detected!
+Iteration: 142
+62.63197966870602 59.26313018798828
+No improvement detected!
+Iteration: 143
+62.63197966870602 60.45746612548828
+No improvement detected!
+Iteration: 144
+62.63197966870602 62.2924919128418
+No improvement detected!
+Iteration: 145
+62.63197966870602 62.2924919128418
+No improvement detected!
+Iteration: 146
+62.63197966870602 60.45746612548828
+No improvement detected!
+Iteration: 147
+62.63197966870602 55.66703796386719
+No improvement detected!
+Iteration: 148
+62.63197966870602 62.2924919128418
+No improvement detected!
+Iteration: 149
+62.63197966870602 60.45746612548828
+No improvement detected!

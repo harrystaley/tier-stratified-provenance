@@ -1,0 +1,454 @@
+Init adv_passage ['[CLS]', 'be', 'careful', 'and', 'drive', 'safe', '.', '[SEP]']
+args.num_adv_passage_tokens 8
+Model embedding Embedding(30522, 768, padding_idx=0)
+db_embeddings: torch.Size([20000, 768])
+Iteration: 0
+2.9267246862842957 4.826648712158203
+Current adv_passage ['[CLS]', 'be', 'careful', 'queensland', 'drive', 'safe', '.', '[SEP]']
+Iteration: 1
+4.826648538972105 4.768405437469482
+No improvement detected!
+Iteration: 2
+4.826648538972105 5.240777969360352
+Current adv_passage ['[CLS]', 'be', 'careful', 'queensland', 'drive', 'safe', 'pilgrims', '[SEP]']
+Iteration: 3
+5.240777837625914 5.5923237800598145
+Current adv_passage ['[CLS]', 'be', 'careful', 'honduras', 'drive', 'safe', 'pilgrims', '[SEP]']
+Iteration: 4
+5.592323751386933 5.803293228149414
+Current adv_passage ['[CLS]', 'be', 'careful', 'honduras', 'drive', '##chal', 'pilgrims', '[SEP]']
+Iteration: 5
+5.803293446610853 5.803293228149414
+No improvement detected!
+Iteration: 6
+5.803293461512015 6.021971702575684
+Current adv_passage ['[CLS]', 'be', 'careful', 'honduras', 'drive', '##chal', 'diplomacy', '[SEP]']
+Iteration: 7
+6.021971485539114 6.235926151275635
+Current adv_passage ['[CLS]', 'vanuatu', 'careful', 'honduras', 'drive', '##chal', 'diplomacy', '[SEP]']
+Iteration: 8
+6.235926217413919 7.107418537139893
+Current adv_passage ['[CLS]', 'vanuatu', 'careful', 'honduras', '##usia', '##chal', 'diplomacy', '[SEP]']
+Iteration: 9
+7.107418557132946 7.138068675994873
+Current adv_passage ['[CLS]', 'diplomacy', 'careful', 'honduras', '##usia', '##chal', 'diplomacy', '[SEP]']
+Iteration: 10
+7.138068647900125 7.911228179931641
+Current adv_passage ['[CLS]', 'diplomacy', 'careful', 'honduras', '##usia', 'illegitimate', 'diplomacy', '[SEP]']
+Iteration: 11
+7.9112281608105945 7.904482841491699
+No improvement detected!
+Iteration: 12
+7.9112281608105945 8.00760269165039
+Current adv_passage ['[CLS]', 'diplomacy', 'careful', 'honduras', '##usia', 'illegitimate', 'diplomacy', 'commencement']
+Iteration: 13
+8.007602791542848 7.800536155700684
+No improvement detected!
+Iteration: 14
+8.007602791542848 8.2710599899292
+Current adv_passage ['[CLS]', 'diplomacy', 'careful', 'honduras', 'glided', 'illegitimate', 'diplomacy', 'commencement']
+Iteration: 15
+8.271059868797428 8.506168365478516
+Current adv_passage ['[CLS]', 'diplomacy', 'careful', 'honduras', 'glided', 'illegitimate', 'diplomacy', 'primary']
+Iteration: 16
+8.506167905422581 8.265400886535645
+No improvement detected!
+Iteration: 17
+8.506167905422581 8.51655101776123
+Current adv_passage ['[CLS]', 'diplomacy', 'careful', 'malacca', 'glided', 'illegitimate', 'diplomacy', 'primary']
+Iteration: 18
+8.516551131909262 8.791451454162598
+Current adv_passage ['[CLS]', 'diplomacy', 'total', 'malacca', 'glided', 'illegitimate', 'diplomacy', 'primary']
+Iteration: 19
+8.791451287616164 8.673332214355469
+No improvement detected!
+Iteration: 20
+8.791451287616162 8.791451454162598
+No improvement detected!
+Iteration: 21
+8.791451287616162 8.644640922546387
+No improvement detected!
+Iteration: 22
+8.791451287616164 9.019669532775879
+Current adv_passage ['[CLS]', 'diplomacy', 'total', 'malacca', 'malacca', 'illegitimate', 'diplomacy', 'primary']
+Iteration: 23
+9.019669624564122 9.050460815429688
+Current adv_passage ['[CLS]', 'diplomacy', 'total', 'malacca', 'malacca', 'illegitimate', 'diplomacy', 'starts']
+Iteration: 24
+9.050460350897513 9.068833351135254
+Current adv_passage ['[CLS]', 'diplomacy', 'total', 'kingdom', 'malacca', 'illegitimate', 'diplomacy', 'starts']
+Iteration: 25
+9.068833752523862 8.506558418273926
+No improvement detected!
+Iteration: 26
+9.068833752523862 9.277545928955078
+Current adv_passage ['[CLS]', '1993', 'total', 'kingdom', 'malacca', 'illegitimate', 'diplomacy', 'starts']
+Iteration: 27
+9.27754555388586 9.374345779418945
+Current adv_passage ['[CLS]', '1993', 'total', 'kingdom', 'georgetown', 'illegitimate', 'diplomacy', 'starts']
+Iteration: 28
+9.37434600393619 9.42510986328125
+Current adv_passage ['[CLS]', '1993', 'total', 'kingdom', 'georgetown', 'concacaf', 'diplomacy', 'starts']
+Iteration: 29
+9.425109782197783 9.3213472366333
+No improvement detected!
+Iteration: 30
+9.425109812000104 9.3213472366333
+No improvement detected!
+Iteration: 31
+9.425109782197781 9.42510986328125
+No improvement detected!
+Iteration: 32
+9.425109812000104 9.542320251464844
+Current adv_passage ['[CLS]', '1993', 'total', 'kingdom', '##achal', 'concacaf', 'diplomacy', 'starts']
+Iteration: 33
+9.542320245914258 9.598870277404785
+Current adv_passage ['[CLS]', '1993', 'typical', 'kingdom', '##achal', 'concacaf', 'diplomacy', 'starts']
+Iteration: 34
+9.598870579889924 9.63943862915039
+Current adv_passage ['[CLS]', '1962', 'typical', 'kingdom', '##achal', 'concacaf', 'diplomacy', 'starts']
+Iteration: 35
+9.639438463803224 9.685394287109375
+Current adv_passage ['[CLS]', '1962', 'elections', 'kingdom', '##achal', 'concacaf', 'diplomacy', 'starts']
+Iteration: 36
+9.685394624482385 9.999404907226562
+Current adv_passage ['[CLS]', '1962', 'elections', 'kingdom', '##achal', 'concacaf', 'traditionally', 'starts']
+Iteration: 37
+9.999405026220044 9.999404907226562
+No improvement detected!
+Iteration: 38
+9.999405056022367 9.825034141540527
+No improvement detected!
+Iteration: 39
+9.999405056022367 9.999404907226562
+No improvement detected!
+Iteration: 40
+9.999405026220046 9.999404907226562
+No improvement detected!
+Iteration: 41
+9.999405056022368 10.107059478759766
+Current adv_passage ['[CLS]', '1962', 'elections', 'kingdom', '##achal', 'concacaf', 'traditionally', 'began']
+Iteration: 42
+10.107059471986238 9.620577812194824
+No improvement detected!
+Iteration: 43
+10.107059471986238 9.856343269348145
+No improvement detected!
+Iteration: 44
+10.107059471986238 10.107059478759766
+No improvement detected!
+Iteration: 45
+10.107059471986238 9.856343269348145
+No improvement detected!
+Iteration: 46
+10.107059471986236 9.746044158935547
+No improvement detected!
+Iteration: 47
+10.107059471986238 9.906373023986816
+No improvement detected!
+Iteration: 48
+10.107059471986238 9.620577812194824
+No improvement detected!
+Iteration: 49
+10.107059471986238 9.906373023986816
+No improvement detected!
+Iteration: 50
+10.10705950178856 9.620577812194824
+No improvement detected!
+Iteration: 51
+10.107059471986236 10.107059478759766
+No improvement detected!
+Iteration: 52
+10.107059471986238 10.107059478759766
+No improvement detected!
+Iteration: 53
+10.107059471986238 10.107059478759766
+No improvement detected!
+Iteration: 54
+10.107059471986238 9.620577812194824
+No improvement detected!
+Iteration: 55
+10.107059471986236 10.107059478759766
+No improvement detected!
+Iteration: 56
+10.107059471986238 10.107059478759766
+No improvement detected!
+Iteration: 57
+10.107059471986236 9.716617584228516
+No improvement detected!
+Iteration: 58
+10.107059471986238 9.746044158935547
+No improvement detected!
+Iteration: 59
+10.107059471986236 10.107059478759766
+No improvement detected!
+Iteration: 60
+10.107059471986238 9.80512523651123
+No improvement detected!
+Iteration: 61
+10.107059471986236 10.107059478759766
+No improvement detected!
+Iteration: 62
+10.107059471986238 9.906373023986816
+No improvement detected!
+Iteration: 63
+10.107059471986238 10.107059478759766
+No improvement detected!
+Iteration: 64
+10.107059471986236 9.906373023986816
+No improvement detected!
+Iteration: 65
+10.107059471986236 9.80512523651123
+No improvement detected!
+Iteration: 66
+10.107059471986238 9.746044158935547
+No improvement detected!
+Iteration: 67
+10.107059471986236 9.882050514221191
+No improvement detected!
+Iteration: 68
+10.107059471986238 9.707365989685059
+No improvement detected!
+Iteration: 69
+10.107059471986238 10.107059478759766
+No improvement detected!
+Iteration: 70
+10.107059471986238 9.716617584228516
+No improvement detected!
+Iteration: 71
+10.10705947198624 9.906373023986816
+No improvement detected!
+Iteration: 72
+10.107059471986238 9.707365989685059
+No improvement detected!
+Iteration: 73
+10.107059471986236 9.746044158935547
+No improvement detected!
+Iteration: 74
+10.10705950178856 9.716617584228516
+No improvement detected!
+Iteration: 75
+10.107059471986238 9.882050514221191
+No improvement detected!
+Iteration: 76
+10.107059471986238 9.882050514221191
+No improvement detected!
+Iteration: 77
+10.107059471986236 9.906373023986816
+No improvement detected!
+Iteration: 78
+10.10705947198624 9.60806655883789
+No improvement detected!
+Iteration: 79
+10.107059471986236 9.707365989685059
+No improvement detected!
+Iteration: 80
+10.107059471986238 9.716617584228516
+No improvement detected!
+Iteration: 81
+10.107059471986238 9.882050514221191
+No improvement detected!
+Iteration: 82
+10.107059471986238 9.906373023986816
+No improvement detected!
+Iteration: 83
+10.107059471986236 9.707365989685059
+No improvement detected!
+Iteration: 84
+10.107059471986238 9.882050514221191
+No improvement detected!
+Iteration: 85
+10.10705947198624 9.759190559387207
+No improvement detected!
+Iteration: 86
+10.107059471986238 9.759190559387207
+No improvement detected!
+Iteration: 87
+10.107059471986238 9.759190559387207
+No improvement detected!
+Iteration: 88
+10.107059471986236 10.016749382019043
+No improvement detected!
+Iteration: 89
+10.107059471986238 9.60806655883789
+No improvement detected!
+Iteration: 90
+10.107059471986238 9.60806655883789
+No improvement detected!
+Iteration: 91
+10.107059471986236 10.016749382019043
+No improvement detected!
+Iteration: 92
+10.107059471986238 9.716617584228516
+No improvement detected!
+Iteration: 93
+10.107059471986238 9.882050514221191
+No improvement detected!
+Iteration: 94
+10.107059471986238 9.716617584228516
+No improvement detected!
+Iteration: 95
+10.107059471986238 9.60806655883789
+No improvement detected!
+Iteration: 96
+10.107059471986238 9.60806655883789
+No improvement detected!
+Iteration: 97
+10.107059471986238 10.107059478759766
+No improvement detected!
+Iteration: 98
+10.107059471986236 9.906373023986816
+No improvement detected!
+Iteration: 99
+10.107059471986236 9.716617584228516
+No improvement detected!
+Iteration: 100
+10.107059471986236 9.882050514221191
+No improvement detected!
+Iteration: 101
+10.107059471986236 9.60806655883789
+No improvement detected!
+Iteration: 102
+10.107059471986238 9.882050514221191
+No improvement detected!
+Iteration: 103
+10.107059471986236 9.906373023986816
+No improvement detected!
+Iteration: 104
+10.107059471986238 9.828817367553711
+No improvement detected!
+Iteration: 105
+10.107059471986238 10.107059478759766
+No improvement detected!
+Iteration: 106
+10.107059471986236 9.759190559387207
+No improvement detected!
+Iteration: 107
+10.107059471986238 9.759190559387207
+No improvement detected!
+Iteration: 108
+10.107059471986238 9.759190559387207
+No improvement detected!
+Iteration: 109
+10.107059471986236 9.96788501739502
+No improvement detected!
+Iteration: 110
+10.107059471986238 9.906373023986816
+No improvement detected!
+Iteration: 111
+10.107059471986238 10.107059478759766
+No improvement detected!
+Iteration: 112
+10.10705947198624 9.906373023986816
+No improvement detected!
+Iteration: 113
+10.107059501788559 9.60806655883789
+No improvement detected!
+Iteration: 114
+10.107059471986236 10.107059478759766
+No improvement detected!
+Iteration: 115
+10.107059471986236 9.716617584228516
+No improvement detected!
+Iteration: 116
+10.107059471986236 9.906373023986816
+No improvement detected!
+Iteration: 117
+10.107059471986236 9.716617584228516
+No improvement detected!
+Iteration: 118
+10.107059471986238 9.828817367553711
+No improvement detected!
+Iteration: 119
+10.107059471986238 9.96788501739502
+No improvement detected!
+Iteration: 120
+10.107059471986238 9.716617584228516
+No improvement detected!
+Iteration: 121
+10.107059471986238 9.759190559387207
+No improvement detected!
+Iteration: 122
+10.107059471986238 10.107059478759766
+No improvement detected!
+Iteration: 123
+10.107059471986236 9.906373023986816
+No improvement detected!
+Iteration: 124
+10.107059471986238 9.828817367553711
+No improvement detected!
+Iteration: 125
+10.107059471986238 9.828817367553711
+No improvement detected!
+Iteration: 126
+10.107059471986238 9.906373023986816
+No improvement detected!
+Iteration: 127
+10.107059471986236 9.906373023986816
+No improvement detected!
+Iteration: 128
+10.107059471986238 10.016749382019043
+No improvement detected!
+Iteration: 129
+10.107059471986238 9.759190559387207
+No improvement detected!
+Iteration: 130
+10.107059471986236 9.60806655883789
+No improvement detected!
+Iteration: 131
+10.107059471986236 9.906373023986816
+No improvement detected!
+Iteration: 132
+10.107059471986238 9.828817367553711
+No improvement detected!
+Iteration: 133
+10.107059471986238 9.60806655883789
+No improvement detected!
+Iteration: 134
+10.107059471986238 9.716617584228516
+No improvement detected!
+Iteration: 135
+10.107059471986238 10.016749382019043
+No improvement detected!
+Iteration: 136
+10.107059471986238 9.96788501739502
+No improvement detected!
+Iteration: 137
+10.107059471986238 9.906373023986816
+No improvement detected!
+Iteration: 138
+10.107059471986236 9.716617584228516
+No improvement detected!
+Iteration: 139
+10.107059471986236 10.016749382019043
+No improvement detected!
+Iteration: 140
+10.107059471986236 10.107059478759766
+No improvement detected!
+Iteration: 141
+10.107059471986238 9.96788501739502
+No improvement detected!
+Iteration: 142
+10.107059471986238 9.716617584228516
+No improvement detected!
+Iteration: 143
+10.107059471986238 10.107059478759766
+No improvement detected!
+Iteration: 144
+10.107059471986238 9.828817367553711
+No improvement detected!
+Iteration: 145
+10.107059471986238 9.96788501739502
+No improvement detected!
+Iteration: 146
+10.107059471986238 9.716617584228516
+No improvement detected!
+Iteration: 147
+10.107059471986238 9.60806655883789
+No improvement detected!
+Iteration: 148
+10.107059471986238 9.96788501739502
+No improvement detected!
+Iteration: 149
+10.107059471986238 10.016749382019043
+No improvement detected!

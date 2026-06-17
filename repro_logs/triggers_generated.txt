@@ -1,0 +1,2 @@
+Agent-Driver trigger (DPR-only, 150-iter, converged@41, fitness 10.107): ['1962','elections','kingdom','##achal','concacaf','traditionally','began']
+EHRAgent trigger (DPR-only, 150-iter, converged@85, fitness 62.63): ['lobe','caine','smiled','approaching']
