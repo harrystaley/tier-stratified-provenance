@@ -7,6 +7,15 @@
 # ephemeral parts of the pod (/root, shell state) to the persistent parts on the
 # volume, so plain `git`, `python`, and `docker` just work for the rest of the session.
 #
+# >>> THIS SCRIPT MUST BE SOURCED, NOT EXECUTED. <<<
+#   GOOD:  source /workspace/tier-stratified-provenance/setup_runpod.sh
+#   BAD:   bash   /workspace/tier-stratified-provenance/setup_runpod.sh   (env vanishes)
+#   BAD:   ./setup_runpod.sh                                              (env vanishes)
+# Sourcing runs the commands in YOUR shell so conda activate / HF_HOME / .env keys
+# persist. Running with bash/./ starts a child process that exits and takes all of
+# that with it. The guard below detects a non-sourced run and tells you what to do.
+# NOTE: every new terminal tab / SSH session is a fresh shell and must re-source this.
+#
 # What persists (on the volume, survives terminate):
 #   /workspace/AgentPoison                    <- attack/reproduction repo
 #   /workspace/tier-stratified-provenance     <- paper/artifact repo
@@ -22,11 +31,35 @@
 #   per-repo git core.sshCommand pointing at those copies
 #   git global identity + safe.directory (reset per pod)
 #   activated conda env + exported HF_HOME + sourced .env in the current shell
-#
-# Usage:
-#   source /workspace/tier-stratified-provenance/setup_runpod.sh
-#   (use `source`, not `bash`, so env activation and exports affect your shell)
 
+# ---------------------------------------------------------------------------
+# GUARD: refuse to run unless sourced. `return` only succeeds in a sourced
+# context; in a child process (bash script.sh / ./script.sh) it fails, so we
+# detect that, print the correct invocation, and exit instead of silently
+# doing setup that would evaporate when the child exits.
+# ---------------------------------------------------------------------------
+_srp_sourced=0
+if [ -n "${ZSH_VERSION:-}" ]; then
+  # zsh: sourced scripts are not in $zsh_eval_context as 'toplevel' with a file
+  case "${ZSH_EVAL_CONTEXT:-}" in *:file) _srp_sourced=1;; esac
+elif [ -n "${BASH_VERSION:-}" ]; then
+  # bash: BASH_SOURCE[0] != $0 when sourced; also `return` works only when sourced
+  (return 0 2>/dev/null) && _srp_sourced=1
+fi
+
+if [ "$_srp_sourced" -eq 0 ]; then
+  # Best-effort path to this script for the copy-paste hint.
+  _srp_self="${BASH_SOURCE[0]:-$0}"
+  printf '\n\033[1;33m[setup] This script configures your shell and must be SOURCED, not executed.\033[0m\n'
+  printf 'Run it like this instead:\n\n'
+  printf '    source %s\n\n' "$_srp_self"
+  printf '(Running with bash or ./ starts a child process; conda activate, HF_HOME,\n'
+  printf ' and the .env keys are set in that child and vanish when it exits — which\n'
+  printf ' looks like "it ran fine" but leaves your shell unconfigured.)\n\n'
+  exit 1
+fi
+
+# From here down we KNOW we are sourced; env changes will persist in the caller.
 set -uo pipefail   # not -e: report and continue, don't die on first hiccup
 
 # ===== EDIT THESE =====
@@ -173,3 +206,6 @@ fi
 echo
 ok "push test:  ssh -i $TIER_KEY_LOCAL -T git@github.com   (deploy-key per-repo message = success)"
 say "next: cd $TIER_REPO && git pull"
+
+# tidy up guard vars (sourced => they'd otherwise linger in the shell)
+unset _srp_sourced _srp_self 2>/dev/null
