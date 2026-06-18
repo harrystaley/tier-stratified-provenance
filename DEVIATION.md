@@ -91,3 +91,112 @@ versus the paper's stealth claim, documented here, not a defect in our pipeline.
 (Optional future work: a stricter `num_candidates` in the perplexity pre-filter would
 trade retrieval effectiveness for readability but still would not reproduce the paper's
 coherence, since the target-generation term remains unrunnable.)
+
+## ASR-r inference (agentdriver/planning/motion_planning.py, agentdriver/llm_core/chat_utils.py)
+
+### Per-token scene pkls absent from the provided dataset
+As released, `planning_batch_inference` loads a per-token scene file
+`data/val/{token}.pkl` for every validation sample (`motion_planning.py` line ~252,
+inside `if True:`). These pkls are NOT present in the authors' provided unified dataset
+(Drive folder `1WNJlgEZA3El6PNudK_onP7dThMXCY60K`). A `gdown` listing of the Agent-Driver
+subtree shows only `finetune/` (`data_samples_{train,val}.json`) and `memory/`
+(`database.pkl`) — no `val/` directory. The pkls are obtainable only via raw nuScenes
+preprocessing (registration + ~300GB + `collect_planner_input.py`), out of scope.
+
+Resolution: ASR-r does not require the pkls. The retrieval query is built in
+`experience_memory.py::get_embedding` as `working_memory["ego_prompts"] +
+working_memory["perception"]` only — nothing from the scene pkl. Both are inline in
+`data_samples_val.json`:
+- `data_sample["perception"]` — inline (also the trigger-injection target).
+- `data_sample["ego"]` — inspected and found identical in format to the output of
+  `extract_ego_inputs(data_dict)` (same `*****Ego States:*****` block: Velocity, Heading
+  Angular Velocity, Acceleration, Can Bus, Heading Speed, Steering, Historical Trajectory,
+  Mission Goal). The authors pre-computed the ego prompt string and stored it inline; the
+  pkl path merely regenerates it.
+
+Edits in `motion_planning.py`: (a) guard the pkl load so a missing file yields
+`data_dict = {}` instead of `FileNotFoundError`; (b) when `data_dict` is empty, set
+`ego_prompts, ego_data = data_sample["ego"], {}` instead of calling
+`FuncAgent(data_dict).get_ego_states()`. The numeric `ego_data` is unused by retrieval
+(only commented-out debug lines in `embedding_retrieve` reference it), so an empty dict
+suffices for ASR-r.
+
+Impact: ASR-r is faithfully reproducible on the provided data. Generation/planning
+metrics that consume the structured `data_dict` are not fully reproducible without the
+scene pkls (see the private-planner deviation below).
+
+### chat_utils.py references `client` without instantiating it
+`completion_with_backoff` calls `client.chat.completions.create(**kwargs)`
+(`chat_utils.py` line ~20) but `client` is never assigned in the module (single
+reference, no definition). As released this raises `NameError: name 'client' is not
+defined` on the first generation call, in any environment — an upstream bug, distinct
+from the 0.28 import guard noted under trigger optimization.
+
+Resolution: added a module-level instantiation alongside the existing import guard:
+```python
+import os
+try:
+    from openai import OpenAI
+    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+except ImportError:
+    OpenAI = None
+    client = None
+```
+This is the openai 1.x client API and is correct only in the openai-1.x environment
+(see two-environment deviation below).
+
+### Private fine-tuned planner inaccessible — trajectory planning skipped for ASR-r
+`planning_single_inference` (`motion_planning.py` line ~500) calls a planner hardcoded
+to the authors' private fine-tuned model
+`ft:gpt-3.5-turbo-0613:zhaorun-openai-team:ft-planner-10-new:9FfscNuu`
+(`agentdriver/llm_core/api_keys.py::FINETUNE_PLANNER_NAME`). It returns
+`openai.NotFoundError: 404 — model does not exist or you do not have access`. The public
+alternative is the local 8B planner `Zhaorun/LLaMA-2-Agent-Driver-Motion-Planner`
+(`use_local_planner=True`).
+
+Resolution: for the ASR-r baseline the trajectory-planning block (`if True:` at line
+~499) was set to `if False:`. `retrieval_success_count` (line ~388) and the reasoning
+backdoor signal `backdoor_success_count` are tallied BEFORE this block, so skipping it
+affects neither ASR-r nor the reasoning-based ASR-a.
+
+Impact: ASR-r = 0.836 (209/250) and reasoning ASR-a = 0.816 are unaffected. Trajectory
+accuracy / ASR-t are not measured; they would require the local 8B planner or an own
+fine-tuned planner.
+
+### Generation model used (verification)
+The reasoning model for the reported run was verified to be `gpt-3.5-turbo` (not gpt-5.5):
+`motion_planning.py:237` instantiates `ReasoningAgent(verbose=True)` with no `model_name`
+(default `"gpt-3.5-turbo"`); the GPT branch leaves `self.model = {}`, so the override at
+`prompt_reasoning.py:864` (`if "model_name" in model.keys()`) does not fire; the value
+propagates as `model_name="gpt-3.5-turbo"` into `run_one_round_conversation` and the API
+call. ASR-r is retrieval-decided and model-independent; the model identity is recorded
+for generation-stage (ASR-a) attribution only.
+
+Pending: re-run the generation stage on the latest model (gpt-5.5) per advisor direction.
+Required adjustments (gpt-5.5 is a reasoning model): set the reasoning model string to
+`gpt-5.5`; the Chat Completions call passes `temperature=0.0` (chat.py line ~14) which
+gpt-5.5 rejects (must be 1 or omitted); `max_tokens` must become `max_completion_tokens`
+and be raised to leave room for reasoning tokens (verified: with a small budget gpt-5.5
+spends it all on reasoning and returns empty content); and the parse for `"Driving Plan:"`
+/ `"SUDDEN STOP"` must be re-verified against gpt-5.5 output formatting.
+
+## Environments: openai 0.28 vs 1.x (two environments required)
+
+StrategyQA reproduction + trigger optimization use the legacy openai 0.28 API
+(`openai.ChatCompletion.create`); Agent-Driver / EHRAgent generation-stage inference use
+the openai 1.x client API (`from openai import OpenAI; client.chat.completions.create`).
+The two APIs are mutually incompatible within one environment.
+
+- `agentpoison` (`environment.yml`) — openai 0.28; StrategyQA + trigger optimization.
+- `agentpoison-oai1` (`environment-oai1.yml`) — openai 1.x; Agent-Driver / EHRAgent
+  generation inference. Derived from `environment.yml` with: name changed, openai pinned
+  `>=1.0,<2`, `autogen==1.0.16` removed (unpublishable; the StrategyQA reproduce.sh strips
+  it too).
+
+Note: upstream `environment.yml` does not install cleanly as-is (`autogen==1.0.16`
+unpublishable); both environments strip it. The authoritative specifications are the
+exported lock files (to be committed), not the hand-written ymls.
+
+Impact: ASR-r is retrieval-decided and API-independent, so it can be measured in either
+environment. Generation-stage metrics for Agent-Driver / EHRAgent must run in
+`agentpoison-oai1`.
