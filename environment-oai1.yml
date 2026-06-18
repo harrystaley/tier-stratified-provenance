@@ -1,0 +1,81 @@
+# environment-oai1.yml
+# openai-1.x variant of the AgentPoison "agentpoison" env, for Agent-Driver / EHRAgent
+# INFERENCE (generation stage), where the code uses the openai 1.x client API.
+#
+# Derived from the project's real environment.yml (the StrategyQA/optimization env),
+# with these deliberate changes:
+#   * name:        agentpoison -> agentpoison-oai1   (separate env, no clobber)
+#   * openai:      unpinned    -> "openai>=1.0,<2"    (1.x client API)
+#   * autogen:     REMOVED      (autogen==1.0.16 is unpublishable; same removal the
+#                               StrategyQA reproduce.sh makes. Not needed for inference.)
+# Everything else mirrors the working env so behavior matches except the openai API.
+#
+# Build (accept ToS first, or conda blocks env creation):
+#   conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+#   conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+#   conda env create -f environment-oai1.yml
+#   conda activate agentpoison-oai1
+#   echo "$CONDA_DEFAULT_ENV"     # MUST print agentpoison-oai1 before any pip/use
+#
+# After it works, capture the exact state:
+#   conda env export -n agentpoison-oai1 --no-builds > environment-oai1-lock.yml
+
+name: agentpoison-oai1
+
+channels:
+  - pytorch
+  - defaults
+  - anaconda
+  - main
+  - nvidia
+  - conda-forge
+
+dependencies:
+  - python=3.9
+  - cudatoolkit-dev=11.7
+  - pip
+  - spacy
+  - spacy-model-en_core_web_sm=3.5.0
+  - pip:
+    - torch==2.0.1
+    - torchaudio
+    - torchvision
+    - huggingface-hub==0.20.2
+    - psutil==5.9.4
+    - iopath
+    - pyyaml==6.0
+    - regex==2022.10.31
+    - tokenizers==0.15.0
+    - tqdm==4.64.1
+    - transformers==4.39.1
+    - timm==0.6.13
+    - webdataset==0.2.48
+    - omegaconf==2.3.0
+    - decord==0.6.0
+    - peft==0.2.0
+    - sentence-transformers
+    - gradio==3.47.1
+    - accelerate==0.26.1
+    - bitsandbytes==0.41.1
+    - scikit-image
+    - wandb
+    - shortuuid
+    - chardet
+    # openai pinned to the 1.x client API (this is the whole point of this env)
+    - "openai>=1.0,<2"
+    # autogen==1.0.16 intentionally REMOVED (unpublishable pin; not needed for inference)
+    - jsonlines==3.1.0
+    - matplotlib==3.7.1
+    - numpy==1.24.3
+    - pandas==2.1.4
+    - pyautogen==0.2.0
+    - seaborn==0.13.1
+    - termcolor==2.4.0
+    - wolframalpha==5.0.0
+    - datasets
+    - gym==0.26.2
+    - tenacity==8.5.0
+    - shapely==2.0.5
+    - casadi==3.6.5
+    - opencv-python==4.10.0.84
+    - bs4
