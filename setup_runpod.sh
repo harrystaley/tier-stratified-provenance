@@ -19,16 +19,19 @@
 # What persists (on the volume, survives terminate):
 #   /workspace/AgentPoison                    <- attack/reproduction repo
 #   /workspace/tier-stratified-provenance     <- paper/artifact repo
+#   /workspace/flowcept                       <- Flowcept fork (tier substrate work)
 #   /workspace/.ssh/deploy_key(.pub)          <- tier repo deploy key (master copy)
 #   /workspace/.ssh/agentpoison_deploy_key(.pub) <- AgentPoison repo deploy key
+#   /workspace/.ssh/flowcept_deploy_key(.pub) <- Flowcept fork deploy key
+#   /workspace/.ssh/config                    <- SSH host aliases (per-repo key routing)
 #   /workspace/miniconda3                     <- conda + the 'agentpoison' env
 #   /workspace/.env                           <- OPENAI_API_KEY / HF_TOKEN
 #   /workspace/hf_cache                       <- model/dataset downloads
 #   /workspace/mongo-data                     <- Flowcept provenance store
 #
 # What's ephemeral (rebuilt each session by this script):
-#   /root/.ssh/*deploy_key (chmod 600 copies; the 0777 volume can't hold 600 perms)
-#   per-repo git core.sshCommand pointing at those copies
+#   /root/.ssh/config + *deploy_key (chmod 600 copies; the 0777 volume can't hold 600)
+#   git routing via SSH host aliases in /root/.ssh/config (github-tier/-agentpoison/-flowcept)
 #   git global identity + safe.directory (reset per pod)
 #   activated conda env + exported HF_HOME + sourced .env in the current shell
 
@@ -70,12 +73,7 @@ GIT_USER_EMAIL="staleyh@gmail.com"
 VOL=/workspace
 TIER_REPO="$VOL/tier-stratified-provenance"
 AP_REPO="$VOL/AgentPoison"
-
-# deploy keys: master copy on volume -> staged 600 copy on local disk
-TIER_KEY_MASTER="$VOL/.ssh/deploy_key"
-TIER_KEY_LOCAL=/root/.ssh/deploy_key
-AP_KEY_MASTER="$VOL/.ssh/agentpoison_deploy_key"
-AP_KEY_LOCAL=/root/.ssh/agentpoison_deploy_key
+FLOWCEPT_REPO="$VOL/flowcept"
 
 CONDA_SH="$VOL/miniconda3/etc/profile.d/conda.sh"
 CONDA_ENV=agentpoison
@@ -96,44 +94,42 @@ fi
 ok "volume present at $VOL (both repos found)"
 
 # ---------------------------------------------------------------------------
-# 1. Stage deploy keys to local disk with correct (600) perms.
-#    The volume mounts 0777 and won't honor chmod, so SSH rejects keys there.
-#    We copy each to /root/.ssh per session where 600 sticks.
+# 1. Stage ALL SSH material (deploy keys + config) to local disk with correct
+#    perms. The volume mounts 0777 and won't honor chmod, so SSH rejects keys
+#    there. We copy the whole $VOL/.ssh dir to /root/.ssh per session where 600
+#    sticks. A glob copy auto-handles any key added to the volume later.
 # ---------------------------------------------------------------------------
 mkdir -p /root/.ssh && chmod 700 /root/.ssh
-stage_key() {  # $1=master $2=local $3=label
-  if [ -f "$1" ]; then
-    cp "$1" "$2"; chmod 600 "$2"
-    ok "$3 deploy key staged to $2 (chmod 600)"
-  else
-    warn "no $3 deploy key at $1 — git over SSH for that repo will fail."
-  fi
-}
-stage_key "$TIER_KEY_MASTER" "$TIER_KEY_LOCAL" "tier"
-stage_key "$AP_KEY_MASTER"   "$AP_KEY_LOCAL"   "AgentPoison"
+if [ -d "$VOL/.ssh" ] && ls "$VOL"/.ssh/* >/dev/null 2>&1; then
+  cp -f "$VOL"/.ssh/* /root/.ssh/
+  chmod 600 /root/.ssh/* 2>/dev/null          # keys + config to 600 (SSH rejects looser)
+  chmod 644 /root/.ssh/*.pub 2>/dev/null       # .pub may be world-readable
+  ok "staged SSH material from $VOL/.ssh (keys + config, chmod 600)"
+  [ -f /root/.ssh/config ] || warn "no config in $VOL/.ssh — alias-based git over SSH will fail"
+else
+  warn "no SSH material at $VOL/.ssh — git over SSH will fail."
+fi
 
 # pre-accept GitHub host key so first push isn't an interactive prompt
 ssh-keyscan -t ecdsa,ed25519,rsa github.com >> /root/.ssh/known_hosts 2>/dev/null
 sort -u /root/.ssh/known_hosts -o /root/.ssh/known_hosts 2>/dev/null
 
 # ---------------------------------------------------------------------------
-# 2. Point each repo's git at its staged key (per-repo core.sshCommand).
-#    Also normalize remotes to plain git@github.com (core.sshCommand handles the key).
+# 2. Verify each repo's origin uses its SSH-config host alias. Routing is now
+#    handled entirely by /root/.ssh/config (github-tier / github-agentpoison /
+#    github-flowcept), so we VERIFY the alias remotes rather than rewriting them.
+#    (The old version rewrote remotes to plain git@github.com each session, which
+#    silently reverted the aliases and broke per-repo key selection.)
 # ---------------------------------------------------------------------------
-if [ -d "$TIER_REPO/.git" ]; then
-  git -C "$TIER_REPO" config core.sshCommand "ssh -i $TIER_KEY_LOCAL -o IdentitiesOnly=yes"
-  git -C "$TIER_REPO" remote set-url origin git@github.com:harrystaley/tier-stratified-provenance.git 2>/dev/null
-  ok "git sshCommand set for tier repo"
-else
-  warn "tier repo has no .git"
-fi
-if [ -d "$AP_REPO/.git" ]; then
-  git -C "$AP_REPO" config core.sshCommand "ssh -i $AP_KEY_LOCAL -o IdentitiesOnly=yes"
-  git -C "$AP_REPO" remote set-url origin git@github.com:harrystaley/AgentPoison.git 2>/dev/null
-  ok "git sshCommand set for AgentPoison repo"
-else
-  warn "AgentPoison repo has no .git"
-fi
+for repo in "$TIER_REPO" "$AP_REPO" "$FLOWCEPT_REPO"; do
+  [ -d "$repo/.git" ] || { warn "$(basename "$repo") has no .git (skipping)"; continue; }
+  url=$(git -C "$repo" remote get-url origin 2>/dev/null)
+  case "$url" in
+    git@github-*) ok "$(basename "$repo") origin alias OK: $url" ;;
+    *) warn "$(basename "$repo") origin is not an alias ($url); fix with:
+        git -C $repo remote set-url origin git@github-<alias>:<owner>/<repo>.git" ;;
+  esac
+done
 
 # ---------------------------------------------------------------------------
 # 3. Git global identity + safe.directory (reset per pod; volume files are owned
@@ -141,6 +137,7 @@ fi
 # ---------------------------------------------------------------------------
 git config --global --add safe.directory "$TIER_REPO"
 git config --global --add safe.directory "$AP_REPO"
+git config --global --add safe.directory "$FLOWCEPT_REPO"
 git config --global user.name  "$GIT_USER_NAME"
 git config --global user.email "$GIT_USER_EMAIL"
 ok "git identity: $(git config --global user.name) <$(git config --global user.email)>"
@@ -176,15 +173,17 @@ fi
 # ---------------------------------------------------------------------------
 # 6. Flowcept backing services (Mongo/Redis) via docker compose — if available.
 #    Mongo data bind-mounts to the volume so provenance survives teardown.
+#    NOTE: Flowcept's compose file lives in the FLOWCEPT repo, not the tier repo.
 # ---------------------------------------------------------------------------
+COMPOSE_FILE="$FLOWCEPT_REPO/deployment/compose-mongo.yml"
 if command -v docker >/dev/null 2>&1; then
-  if [ -f "$TIER_REPO/docker-compose.yml" ] && docker info >/dev/null 2>&1; then
-    mkdir -p "$VOL/mongo-data" "$VOL/neo4j-data"
-    ok "provenance data dirs ready ($VOL/mongo-data)"
-    ( cd "$TIER_REPO" && docker compose up -d redis mongo ) && ok "compose: redis + mongo up"
-    ( cd "$TIER_REPO" && docker compose ps )
+  if [ -f "$COMPOSE_FILE" ] && docker info >/dev/null 2>&1; then
+    mkdir -p "$VOL/mongo-data"
+    ok "provenance data dir ready ($VOL/mongo-data)"
+    ( cd "$FLOWCEPT_REPO" && docker compose -f "$COMPOSE_FILE" up -d ) && ok "compose: redis + mongo up"
+    ( cd "$FLOWCEPT_REPO" && docker compose -f "$COMPOSE_FILE" ps )
   else
-    warn "docker present but daemon unreachable or no compose file — skipping services."
+    warn "docker present but daemon unreachable or no compose file at $COMPOSE_FILE — skipping services."
   fi
 else
   warn "docker not installed on this pod — skipping Flowcept services (fine for CPU recon)."
@@ -196,6 +195,7 @@ fi
 say "session ready"
 printf '  tier repo : %s\n' "$TIER_REPO"
 printf '  ap repo   : %s\n' "$AP_REPO"
+printf '  flowcept  : %s\n' "$FLOWCEPT_REPO"
 printf '  python    : %s\n' "$(command -v python) ($(python --version 2>&1))"
 printf '  HF_HOME   : %s\n' "$HF_HOME"
 if command -v nvidia-smi >/dev/null 2>&1; then
@@ -204,7 +204,7 @@ else
   printf '  GPU       : <none — CPU pod>\n'
 fi
 echo
-ok "push test:  ssh -i $TIER_KEY_LOCAL -T git@github.com   (deploy-key per-repo message = success)"
+ok "push test:  ssh -T git@github-flowcept   (repo-named auth message = success)"
 say "next: cd $TIER_REPO && git pull"
 
 # tidy up guard vars (sourced => they'd otherwise linger in the shell)
