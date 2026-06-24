@@ -200,3 +200,60 @@ exported lock files (to be committed), not the hand-written ymls.
 Impact: ASR-r is retrieval-decided and API-independent, so it can be measured in either
 environment. Generation-stage metrics for Agent-Driver / EHRAgent must run in
 `agentpoison-oai1`.
+
+## EHRAgent ASR-r inference (EhrAgent/ehragent/{medagent,config,main,eval}.py)
+
+The EHRAgent inference path does not run as shipped at commit `f859b50`. Four
+classes of fix were required; all are recorded in
+`patches/agentpoison_ehragent_asrr_repro.patch` (round-trip verified with
+`git apply --reverse --check`). Result: ASR-r = 1.000 (n=299), vs paper 98.9
+(Table 1, EHRAgent / ChatGPT / contrastive-DPR), band 88.9–100 -> PASS.
+
+### Import paths reference a non-existent top-level package
+`medagent.py` (lines 13–14) and `eval.py` (line 4) import
+`from AgentPoison.utils import ...` / `from AgentPoison.config import ...`, but
+there is no top-level `AgentPoison` package; the modules live in `algo/`
+(`algo/utils.py`, `algo/config.py`). The optimizer (`algo/trigger_optimization.py:23`)
+uses the working convention `from algo.utils import ...`. Corrected all such imports
+to `algo.*`. Also dropped `model_code_to_embedder_name_dsi` from the medagent import:
+it is undefined in this commit and unused in the EHRAgent tree (a dead name). These
+imports never executed upstream because EHRAgent *inference* was evidently never run
+(only its trigger optimization, which imports from `algo/` correctly).
+
+### Hardcoded (and now-dead) OpenAI key
+`config.py::openai_config` hardcoded a literal `sk-...` key. Redirected to
+`os.environ["OPENAI_API_KEY"]` (added `import os`). The literal key 401s (it is a
+leaked key, since revoked) — a correctness fix and a security fix. The patch removes
+the literal (it appears only on a deletion line).
+
+### Deprecated victim model — substitution FORCED, not chosen
+`config.py` requested `gpt-3.5-turbo-16k-0613`, which OpenAI has **deprecated and
+removed** (API returns 404 `model_not_found`). Unlike the Agent-Driver generation
+model (verified still-current; see the generation-model note above), EHRAgent's exact
+paper model no longer exists, so substitution to `gpt-3.5-turbo` (the closest live
+GPT-3.5 family model, confirmed available) was forced. ASR-r is retrieval-decided and
+therefore unaffected by this substitution. However, it means EHRAgent *generation*
+metrics (ASR-a/ASR-t) cannot faithfully reproduce the paper's exact model — any such
+run is a transfer extension, not a reproduction. This sharpens the transfer-vs-
+reproduction framing: the 2023-era victim models AgentPoison used are aging out of the
+API.
+
+### Memory DB size (193 vs paper's 700-augmented)
+The run used the bundled EHRAgent memory DB (193 entries; poisoned to 197). The paper
+augments EHRAgent memory to 700 entries specifically because the tiny default DB makes
+attacks too easy to discriminate methods. The smaller DB eases retrieval, which
+explains ASR-r landing at the band ceiling (100.0 vs paper 98.9). This is a faithful-
+but-not-identical retrieval condition; recorded here, not corrected, since augmenting
+to 700 is out of scope for the gate.
+
+### Runtime dependencies added to `agentpoison-oai1`
+`python-Levenshtein`, `replicate`, `hf_transfer` (all imported at module load in
+`medagent.py`/`eval.py` but absent from the env as built). Captured in
+`environment-oai1.lock.yml`. EHRAgent inference requires the openai 1.x env
+(`medagent.py` uses `from openai import OpenAI`), not the 0.28 StrategyQA env.
+
+### Trigger (converged, DPR-only optimization)
+`main.py:91` set to `['lobe','caine','smiled','approaching']` (converged iter 85,
+fitness 62.63). This is an experiment-specific config, not a run-enabling fix; if the
+run-enabling subset (imports, env key, model) is ever offered upstream, the trigger
+line should be excluded.

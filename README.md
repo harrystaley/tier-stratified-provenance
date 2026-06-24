@@ -10,6 +10,8 @@ must reproduce the published retrieval ASR before any defense condition is run.
 | Metric | Paper (Table 1) | This reproduction | Status |
 |---|---|---|---|
 | ASR-r (GPT-3.5, ReAct-StrategyQA/DPR) | 65.5 | **57.2** (n=229) | **PASS** (within ±10 pp band 55.5–75.5) |
+| ASR-r (GPT-3.5, Agent-Driver/DPR) | 80.0 | **83.6** (n=250) | **PASS** (within ±10 pp band 70.0–90.0) |
+| ASR-r (GPT-3.5, EHRAgent/DPR) | 98.9 | **100.0** (n=299) | **PASS** (within ±10 pp band 88.9–100) |
 | ASR-r (LLaMA3-70B, ReAct-StrategyQA/DPR) | 58.4 | _pending — awaiting HF gated access_ | _setup verified; run pending (band 48.4–68.4)_ |
 
 The achieved GPT-3.5 ASR-r of 57.2 sits near the lower edge of tolerance. This is
