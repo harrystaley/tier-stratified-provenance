@@ -27,6 +27,8 @@ This matches the "two implementation points" by construction.
 ```yaml
 attestation:
   enabled: true
+  # type selects the pluggable validator backend:
+  # c2pa | pki | sigstore | tpm (EK/AIK chain) | bundled
   trust_roots:
     - id: "eval-root-0"
       type: "bundled"
@@ -111,3 +113,22 @@ item, and `gate_rerank` re-weights by it.
 - Gate hard (`gate_filter`, DAO `$match`): DONE
 - Gate soft (`gate_rerank`, wrapper re-rank): DONE
 - Connective tissue (retrieval carries tier+score inline): NOT BUILT -- next step.
+
+## Attestation backends and how they tier
+
+The tier is always decided by one rule: *does the claim validate against a
+configured trust root, and does it bind the content?* The backend (selected by the
+trust-root `type`) only changes HOW that validation is performed, not the rule.
+
+| Backend | T_S (validates against your root, binds content) | T_W (present, not trust-anchored) |
+|---|---|---|
+| C2PA | manifest signature chains to your C2PA trust list | self-signed / unknown-cert manifest |
+| PKI | content signature chains to a CA in your bundle | signature from an untrusted CA |
+| Sigstore | bundle verifies against a trusted identity | identity not in your trust set |
+| TPM 2.0 | content signed by a TPM-sealed key whose cert chains to your CA | bare platform quote (attests machine, not content), or EK/AIK chain you do not hold |
+| handle | (n/a -- not cryptographic) | resolvable source handle, no signature |
+
+TPM note: "TPM" alone does not imply T_S. A TPM-sealed signing key that chains to a
+trusted CA reaches T_S; a bare platform/boot quote, or a TPM whose endorsement
+chain is not in the trust set, is T_W. This matches the R2a (TPM-dominant)
+deployment regime, where TPM attestations modally cluster at T_W.
