@@ -124,7 +124,7 @@ pip install flowcept                     # or: git clone github.com/ORNL/flowcep
 > Docker volume. Named Docker volumes live on the pod's ephemeral disk and are
 > destroyed on terminate — which would wipe the provenance store this project is
 > built to protect. The bind mount keeps provenance alive across pod teardown. The
-> `setup_runpod.sh` bootstrap creates these dirs before bringing the services up.
+> `setup.sh` bootstrap creates these dirs before bringing the services up.
 
 Smoke test before going further — confirm Flowcept can capture and store a trivial
 workflow (see `scripts/smoke_flowcept.py` in this bundle). If this doesn't pass, nothing

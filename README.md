@@ -42,7 +42,7 @@ Each fresh pod re-attaches the `agentpoison-vol` network volume at `/workspace`
 Pod-local state (conda init, git identity, SSH key perms) resets per pod, so run
 the bootstrap once at the start of every session:
 
-    source /workspace/tier-stratified-provenance/setup_runpod.sh
+    source /workspace/tier-stratified-provenance/setup.sh
 
 Use `source` (not `bash`) so the conda env and `.env` exports apply to your shell.
 The script: verifies the volume, stages the per-repo deploy keys to `/root/.ssh`

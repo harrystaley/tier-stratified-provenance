@@ -103,7 +103,7 @@ so killing early loses nothing.
   pytorch CUDA index). The import-guard-in-the-working-env path avoided rebuilding.
 - **Run long optimizations under `nohup`** — the RunPod proxy SSH dropped repeatedly;
   foreground jobs survived this time only by luck.
-- **Add to `setup_runpod.sh`:** `conda tos accept --override-channels --channel
+- **Add to `setup.sh`:** `conda tos accept --override-channels --channel
   https://repo.anaconda.com/pkgs/main` (and the `/r` channel) — fresh pods silently
   block conda operations on the unaccepted channel ToS.
 - **HF gated access:** Llama-2 (`Meta's Llama2 models`) and Llama-3.1 are ACCEPTED;
@@ -244,7 +244,7 @@ consistency with the gpt35/70b artifacts is wanted.]
 
 ## Sequence when A100 is up (Meta unblocked)
 
-1. Bring up A100; `source /workspace/tier-stratified-provenance/setup_runpod.sh`;
+1. Bring up A100; `source /workspace/tier-stratified-provenance/setup.sh`;
    set `HF_HOME=/workspace/.cache/huggingface` so weights land on the volume.
 2. 70B StrategyQA arm (README §7) — the original blocker; one command.
 3. Agent-Driver: optimize trigger (above) -> extract -> set in motion_planning.py ->
