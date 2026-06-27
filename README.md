@@ -56,7 +56,7 @@ repos. See `.env.example` for the required keys.
 
 ## 1. Environment
 
-The authors' `environment.yml` (note: `.yml`, not `.yaml`) does not install cleanly.
+The authors' `environment/environment.yml` (note: `.yml`, not `.yaml`) does not install cleanly.
 
 - **Remove the bad pin `autogen==1.0.16`** — that version is not published on PyPI
   (max real version ~0.9.7). `autogen` has zero references on the ReAct path, so it
@@ -72,7 +72,7 @@ The authors' `environment.yml` (note: `.yml`, not `.yaml`) does not install clea
 
 ```bash
 # from a fresh AgentPoison clone at f859b50
-conda env create -f environment.yml          # after removing the autogen==1.0.16 line
+conda env create -f environment/environment.yml          # after removing the autogen==1.0.16 line
 conda activate agentpoison
 pip install openai==0.28
 export HF_HUB_ENABLE_HF_TRANSFER=0
@@ -169,9 +169,9 @@ cp .env.example .env
 This is the validated path. From the workspace root:
 ```bash
 PATCH=/workspace/tier-stratified-provenance/agentpoison_gpt35_repro.patch \
-  bash tier-stratified-provenance/reproduce.sh /workspace/repro-run
+  bash tier-stratified-provenance/scripts/reproduce.sh /workspace/repro-run
 ```
-`reproduce.sh` performs Sections 1-4 automatically: clones upstream `AI-secure/AgentPoison`
+`scripts/reproduce.sh` performs Sections 1-4 automatically: clones upstream `AI-secure/AgentPoison`
 at `f859b50`, applies `agentpoison_gpt35_repro.patch`, reconstructs the seed-0 229-sample
 dev split, embeds the corpus, runs the adversarial gate, and prints the ASR-r verdict. It
 auto-sources `.env` (default `/workspace/.env`; override with `ENV_FILE=/path/to/.env`).
@@ -204,7 +204,7 @@ python ReAct/run_strategyqa_gpt3.5.py -m dpr -t adv -s result/gate_attack
   `ReAct/database/embeddings/`; subsequent runs reuse the cache.
 - ~15–20 min wall-clock for the full 229; this is the billed (API) portion.
 
-> The canonical result in this artifact was produced by `reproduce.sh` (§5.2). The
+> The canonical result in this artifact was produced by `scripts/reproduce.sh` (§5.2). The
 > manual command above is the same run the script performs; results should match within
 > run-to-run noise.
 
@@ -225,7 +225,7 @@ records (the script appends). The gate file should contain exactly 229 unique in
 
 ## 7. LLaMA3-70B arm (cross-backbone)
 
-The LLaMA3-70B backbone is reproduced via `reproduce_llama3_70b.sh`, which runs the
+The LLaMA3-70B backbone is reproduced via `scripts/reproduce_llama3_70b.sh`, which runs the
 model **locally in 4-bit on a single 80 GB A100**. Same DPR retriever, same trigger, same
 seed-0 229-sample dev split as the GPT-3.5 arm — the only intended differences are the
 backbone and 4-bit quantization (deviation D5). Acceptance: ASR-r within 48.4–68.4 vs.
@@ -256,7 +256,7 @@ python -c "from huggingface_hub import hf_hub_download; import os; \
 **Run (one command):**
 ```bash
 PATCH=/workspace/tier-stratified-provenance/agentpoison_llama3_70b_repro.patch \
-  bash tier-stratified-provenance/reproduce_llama3_70b.sh /workspace/repro-run-70b
+  bash tier-stratified-provenance/scripts/reproduce_llama3_70b.sh /workspace/repro-run-70b
 ```
 First run downloads ~tens of GB of 70B weights (cached after). The full 229-question run
 is multiple hours on a single A100.

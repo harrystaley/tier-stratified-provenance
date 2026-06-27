@@ -23,8 +23,8 @@ retrieval. Documented as a reproducibility gap in the artifact.
 - `trigger_sequence`: upstream assigns it only in the `agent=='ad'` branch but
   references it in logging/target paths for all agents (NameError for ehr/qa).
   Initialized to "" before the loop.
-Both are target-stage / logging variables; neither affects the DPR retrieval
-fitness computation. Confirmed by normal convergence with the fixes applied.
+  Both are target-stage / logging variables; neither affects the DPR retrieval
+  fitness computation. Confirmed by normal convergence with the fixes applied.
 
 ### openai import guard (agentdriver/llm_core/chat_utils.py)
 Agent-Driver code uses the openai 1.x API (`from openai import OpenAI`), but the
@@ -187,13 +187,13 @@ StrategyQA reproduction + trigger optimization use the legacy openai 0.28 API
 the openai 1.x client API (`from openai import OpenAI; client.chat.completions.create`).
 The two APIs are mutually incompatible within one environment.
 
-- `agentpoison` (`environment.yml`) — openai 0.28; StrategyQA + trigger optimization.
-- `agentpoison-oai1` (`environment-oai1.yml`) — openai 1.x; Agent-Driver / EHRAgent
-  generation inference. Derived from `environment.yml` with: name changed, openai pinned
-  `>=1.0,<2`, `autogen==1.0.16` removed (unpublishable; the StrategyQA reproduce.sh strips
+- `agentpoison` (`environment/environment.yml`) — openai 0.28; StrategyQA + trigger optimization.
+- `agentpoison-oai1` (`environment/environment-oai1.yml`) — openai 1.x; Agent-Driver / EHRAgent
+  generation inference. Derived from `environment/environment.yml` with: name changed, openai pinned
+  `>=1.0,<2`, `autogen==1.0.16` removed (unpublishable; the StrategyQA scripts/reproduce.sh strips
   it too).
 
-Note: upstream `environment.yml` does not install cleanly as-is (`autogen==1.0.16`
+Note: upstream `environment/environment.yml` does not install cleanly as-is (`autogen==1.0.16`
 unpublishable); both environments strip it. The authoritative specifications are the
 exported lock files (to be committed), not the hand-written ymls.
 
@@ -249,7 +249,7 @@ to 700 is out of scope for the gate.
 ### Runtime dependencies added to `agentpoison-oai1`
 `python-Levenshtein`, `replicate`, `hf_transfer` (all imported at module load in
 `medagent.py`/`eval.py` but absent from the env as built). Captured in
-`environment-oai1.lock.yml`. EHRAgent inference requires the openai 1.x env
+`environment/environment-oai1.lock.yml`. EHRAgent inference requires the openai 1.x env
 (`medagent.py` uses `from openai import OpenAI`), not the 0.28 StrategyQA env.
 
 ### Trigger (converged, DPR-only optimization)

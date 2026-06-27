@@ -8,10 +8,10 @@ they assume network access, which the assistant's sandbox does not have.
 > - ReAct agent backbone: **GPT-3.5 (API)** or **LLaMA3-70B (local)**.
 > - StrategyQA knowledge base: ~10k Wikipedia passages.
 > - Reference retriever/embedder: **DPR** (repo default `--model dpr`); contrastive
->   alternatives ANCE, BGE; end-to-end REALM, ORQA.
+    >   alternatives ANCE, BGE; end-to-end REALM, ORQA.
 > - ReAct poisoning: **4 poisoned instances** injected.
 > - Repos: AgentPoison `github.com/AI-secure/AgentPoison` (a.k.a. BillChan226);
->   A-MemGuard `github.com/TangciuYueng/AMemGuard`; Flowcept `github.com/ORNL/flowcept`.
+    >   A-MemGuard `github.com/TangciuYueng/AMemGuard`; Flowcept `github.com/ORNL/flowcept`.
 
 ---
 
@@ -127,7 +127,7 @@ pip install flowcept                     # or: git clone github.com/ORNL/flowcep
 > `setup_runpod.sh` bootstrap creates these dirs before bringing the services up.
 
 Smoke test before going further — confirm Flowcept can capture and store a trivial
-workflow (see `smoke_flowcept.py` in this bundle). If this doesn't pass, nothing
+workflow (see `scripts/smoke_flowcept.py` in this bundle). If this doesn't pass, nothing
 downstream will.
 
 > **This is where C1 lives.** Your attestation collector / tier annotator /
@@ -149,7 +149,7 @@ pip install -r requirements.txt          # expect to pin/resolve conflicts; see 
 Reference run shape (StrategyQA / ReAct), from the repo. NOTE: the ReAct-StrategyQA
 entrypoint is under `ReAct/`, NOT `EhrAgent/` — EHRAgent is a different agent with a
 different benchmark and its own targets. Using the EHRAgent path would run the wrong
-experiment entirely (your gate targets in `agentpoison_reference.py` are the
+experiment entirely (your gate targets in `scripts/agentpoison_reference.py` are the
 ReAct-StrategyQA numbers).
 
 ```bash
@@ -194,8 +194,8 @@ Conditions:
 
 **Reproduction-first gate (load-bearing).** For each backbone, BEFORE running any
 defense condition, reproduce AgentPoison's published *attack* baseline and confirm
-your ASR-r lands within tolerance of the paper's number (`agentpoison_reference.py`
-holds the targets; `run_experiment.py` enforces the gate). If a backbone won't
+your ASR-r lands within tolerance of the paper's number (`scripts/agentpoison_reference.py`
+holds the targets; `scripts/run_experiment.py` enforces the gate). If a backbone won't
 reproduce, do NOT run defense conditions on it until you understand why — that's the
 test for hidden API moderation, a drifted snapshot, or a harness bug. The open-weights
 LLaMA3-70B also serves as a **control on the closed GPT-3.5 API**: if the defense
@@ -215,7 +215,7 @@ optional robustness slice for later, not part of the core result.
 3. Only then point it at **LLaMA3-70B** for full runs. Do NOT debug on 70B — its slow
    iteration cycle is the thing most likely to eat your weeks.
 
-`run_experiment.py` defaults to dev mode; pass `--full` only after the dev slice
+`scripts/run_experiment.py` defaults to dev mode; pass `--full` only after the dev slice
 passes end-to-end.
 
 ---

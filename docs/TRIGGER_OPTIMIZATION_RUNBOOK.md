@@ -32,8 +32,8 @@ Use this block, not the stale guidance further down. Full deviation rationale in
   - `trigger_sequence`: upstream assigns it only in the `agent=='ad'` branch but
     references it in logging/target paths for all agents. Initialized to `""` before
     the loop.
-  Both are target-stage / logging variables; neither affects the DPR retrieval
-  fitness. Confirmed by normal convergence with the fixes applied.
+    Both are target-stage / logging variables; neither affects the DPR retrieval
+    fitness. Confirmed by normal convergence with the fixes applied.
 
 - **openai import guard** (`agentdriver/llm_core/chat_utils.py`): Agent-Driver code
   uses the openai 1.x API, but the env pins openai 0.28 for the StrategyQA legacy 0.x
@@ -121,7 +121,7 @@ All three remaining GPU tasks wait on the SAME unblock: Meta HuggingFace gated-a
 approval for `meta-llama/Meta-Llama-3-70B-Instruct` (needed for the 70B arm; the A100
 stays stopped until then to avoid idle billing). When the A100 is up, do them in one
 session. This runbook covers the two NEW domains' trigger optimization; the 70B inference
-arm is in README §7 / `reproduce_llama3_70b.sh`.
+arm is in README §7 / `scripts/reproduce_llama3_70b.sh`.
 
 ## Why these are GPU (correction to earlier optimism)
 
@@ -148,12 +148,12 @@ depend on the wandb block:
 
 **Fix (choose one):**
 - (a) Run offline with a neutral entity:
-      `export WANDB_MODE=offline`
-      and patch line ~343: `entity="billchenzr226"` -> your entity or remove entity arg.
-      wandb then runs locally (defines `config`), no auth, no network.
+  `export WANDB_MODE=offline`
+  and patch line ~343: `entity="billchenzr226"` -> your entity or remove entity arg.
+  wandb then runs locally (defines `config`), no auth, no network.
 - (b) Decouple `config` from wandb: define a small namespace from `args`
-      (`config = args` or a SimpleNamespace) before `root_dir`, and gate the wandb calls.
-      Cleaner for the artifact; do as a documented patch (git diff), not hand-edit.
+  (`config = args` or a SimpleNamespace) before `root_dir`, and gate the wandb calls.
+  Cleaner for the artifact; do as a documented patch (git diff), not hand-edit.
 
 Recommend (b) for the artifact (keeps runs wandb-independent), but (a) is faster.
 

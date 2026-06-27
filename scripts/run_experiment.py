@@ -36,6 +36,15 @@ from agentpoison_reference import (
 
 load_dotenv()
 
+# Resolve paths relative to this file, not the current working directory, so the
+# harness behaves identically no matter where it is invoked from. Outputs go to
+# <repo-root>/outputs (repo root = parent of this scripts/ dir).
+from pathlib import Path
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _SCRIPT_DIR.parent
+_OUT_DIR = _REPO_ROOT / "outputs"
+_OUT_DIR.mkdir(exist_ok=True)
+
 # ---------------------------------------------------------------------------
 # Fixed variables (pinned identically across EVERY run). Changing one of these
 # changes the experiment; that's the point of keeping them in one place.
@@ -170,7 +179,7 @@ def main(dev: bool = True):
         all_results.extend(run_backbone(backbone))
 
     out = [asdict(r) for r in all_results]
-    fname = "results_dev.json" if dev else "results_full.json"
+    fname = _OUT_DIR / ("results_dev.json" if dev else "results_full.json")
     with open(fname, "w") as f:
         json.dump(out, f, indent=2)
     print(f"\nWrote {len(out)} run records to {fname}")
