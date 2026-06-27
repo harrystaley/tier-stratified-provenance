@@ -1,0 +1,81 @@
+# environment-oai1-mac.yml
+# Apple-Silicon (osx-arm64) variant of agentpoison-oai1, for LOCAL EDITING and
+# IMPORT CHECKS of the EHRAgent code -- NOT for GPU runs. The actual DPR retrieval
+# uses .to("cuda") and only runs on the pod/A100; this env exists so medagent.py
+# and the attestation edits import and lint on the Mac.
+#
+# Derived from environment-oai1.yml with the CUDA-only pieces removed (they have no
+# Apple-Silicon build and caused the osx-arm64 solve to fail):
+#   * cudatoolkit-dev=11.7   REMOVED  (NVIDIA-only; the package that failed to solve)
+#   * bitsandbytes==0.41.1   REMOVED  (GPU 4-bit quant; no arm64 wheel; only the 70B
+#                                      arm uses it, which is pod-only anyway)
+#   * nvidia channel         REMOVED  (nothing left needs it)
+# torch resolves to the arm64 CPU/MPS build automatically on this platform.
+#
+# Build:
+#   conda env create -f environment-oai1-mac.yml
+#   conda activate agentpoison-oai1-mac
+#   pip install -e ~/Git/flowcept    # so `from flowcept...` resolves for Piece 2
+#
+# NOTE: this env is for import/lint, not execution. Calling load_db /
+# retrieve_embedding_examples will fail at .to("cuda") on a Mac -- expected.
+# Run the real attack on the pod.
+
+name: agentpoison-oai1-mac
+
+channels:
+  - pytorch
+  - defaults
+  - anaconda
+  - main
+  - conda-forge
+
+dependencies:
+  - python=3.9
+  - pip
+  - spacy
+  - spacy-model-en_core_web_sm=3.5.0
+  - pip:
+      - torch==2.0.1
+      - torchaudio
+      - torchvision
+      - huggingface-hub==0.20.2
+      - psutil==5.9.4
+      - iopath
+      - pyyaml==6.0
+      - regex==2022.10.31
+      - tokenizers==0.15.0
+      - tqdm==4.64.1
+      - transformers==4.39.1
+      - timm==0.6.13
+      - webdataset==0.2.48
+      - omegaconf==2.3.0
+      - peft==0.2.0
+      - sentence-transformers
+      - gradio==3.47.1
+      - accelerate==0.26.1
+      # bitsandbytes REMOVED (GPU-only; pod handles the 4-bit 70B arm)
+      - scikit-image
+      - wandb
+      - shortuuid
+      - chardet
+      - "openai>=1.0,<2"
+      - jsonlines==3.1.0
+      - matplotlib==3.7.1
+      - numpy==1.24.3
+      - pandas==2.1.4
+      - pyautogen==0.2.0
+      - seaborn==0.13.1
+      - termcolor==2.4.0
+      - wolframalpha==5.0.0
+      - datasets
+      - gym==0.26.2
+      - tenacity==8.5.0
+      - shapely==2.0.5
+      - casadi==3.6.5
+      - opencv-python==4.10.0.84
+      - bs4
+    # decord==0.6.0 OMITTED by default -- it frequently has no Apple-Silicon wheel.
+    # If medagent.py / algo.utils imports it and you hit ImportError, try:
+    #   pip install eva-decord        # arm64-friendly fork
+    # It is a video loader; the EHRAgent text path does not use it.
