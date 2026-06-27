@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# setup_runpod.sh — per-pod session bootstrap for the tier-stratified-provenance project.
+# setup.sh — per-pod session bootstrap for the tier-stratified-provenance project.
 #
 # Run ONCE at the start of every fresh RunPod session (CPU pod or A100 pod), AFTER
 # attaching the agentpoison-vol network volume at /workspace. It re-links the
@@ -8,9 +8,9 @@
 # volume, so plain `git`, `python`, and `docker` just work for the rest of the session.
 #
 # >>> THIS SCRIPT MUST BE SOURCED, NOT EXECUTED. <<<
-#   GOOD:  source /workspace/tier-stratified-provenance/setup_runpod.sh
-#   BAD:   bash   /workspace/tier-stratified-provenance/setup_runpod.sh   (env vanishes)
-#   BAD:   ./setup_runpod.sh                                              (env vanishes)
+#   GOOD:  source /workspace/tier-stratified-provenance/setup.sh
+#   BAD:   bash   /workspace/tier-stratified-provenance/setup.sh   (env vanishes)
+#   BAD:   ./setup.sh                                              (env vanishes)
 # Sourcing runs the commands in YOUR shell so conda activate / HF_HOME / .env keys
 # persist. Running with bash/./ starts a child process that exits and takes all of
 # that with it. The guard below detects a non-sourced run and tells you what to do.

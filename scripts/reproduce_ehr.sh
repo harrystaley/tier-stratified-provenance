@@ -19,6 +19,7 @@
 # Overridable via environment:
 #   AGENTPOISON_DIR (default /workspace/AgentPoison)
 #   ENV_NAME        (default agentpoison-oai1)
+#   CONDA_BASE      (auto-detected; override if conda is installed elsewhere)
 #   NUM_QUESTIONS   (default 317 — full eICU set; 299 score after memory-match)
 #   REPRO_COMMIT    (default 5f8845d — the EHRAgent inference-path fix)
 # =============================================================================
@@ -34,7 +35,7 @@ PASS_LOW=88.9
 PASS_HIGH=100.0
 
 # ---- preconditions ----------------------------------------------------------
-: "${OPENAI_API_KEY:?Set OPENAI_API_KEY — config.py reads the live key from the environment}"
+: "${OPENAI_API_KEY:?Set OPENAI_API_KEY in the environment (export OPENAI_API_KEY=sk-...); config.py reads the live key from it}"
 
 if [ ! -d "$AGENTPOISON_DIR" ]; then
   echo "ERROR: AgentPoison checkout not found at $AGENTPOISON_DIR" >&2
@@ -42,11 +43,51 @@ if [ ! -d "$AGENTPOISON_DIR" ]; then
   exit 1
 fi
 
-# ---- activate env -----------------------------------------------------------
-# EHRAgent inference requires openai 1.x (medagent.py: `from openai import OpenAI`),
-# unlike StrategyQA which needs openai 0.28. Env also needs python-Levenshtein,
-# replicate, hf_transfer (added at env-build time, not via the repo).
-source "$(conda info --base)/etc/profile.d/conda.sh"
+# ---- locate + initialize conda ----------------------------------------------
+# `conda activate` needs conda's shell function sourced first. We do not assume
+# conda is already on PATH (it usually is NOT in a non-interactive `bash script`
+# shell). Try an explicit override, then `conda info --base` if conda happens to
+# be on PATH, then the common install locations.
+init_conda() {
+  local candidates=()
+  [ -n "${CONDA_BASE:-}" ] && candidates+=("$CONDA_BASE/etc/profile.d/conda.sh")
+  if command -v conda >/dev/null 2>&1; then
+    candidates+=("$(conda info --base)/etc/profile.d/conda.sh")
+  fi
+  candidates+=(
+    /workspace/miniconda3/etc/profile.d/conda.sh
+    "$HOME/miniconda3/etc/profile.d/conda.sh"
+    "$HOME/anaconda3/etc/profile.d/conda.sh"
+    /opt/conda/etc/profile.d/conda.sh
+    /root/miniconda3/etc/profile.d/conda.sh
+  )
+  local c
+  for c in "${candidates[@]}"; do
+    if [ -f "$c" ]; then
+      # shellcheck disable=SC1090
+      source "$c"
+      return 0
+    fi
+  done
+  return 1
+}
+
+if ! init_conda; then
+  echo "ERROR: could not locate conda.sh to initialize conda." >&2
+  echo "       Set CONDA_BASE=/path/to/miniconda3 (the dir containing etc/profile.d/conda.sh)" >&2
+  exit 1
+fi
+echo "[reproduce_ehr] conda initialized from: $(conda info --base)"
+
+# ---- verify the target env exists, then activate ----------------------------
+if ! conda env list | awk '{print $1}' | grep -qx "$ENV_NAME"; then
+  echo "ERROR: conda env '$ENV_NAME' not found." >&2
+  echo "       Available envs:" >&2
+  conda env list | sed 's/^/         /' >&2
+  echo "       Create it from the committed lock file, e.g.:" >&2
+  echo "         conda env create -f environment-oai1.lock.yml" >&2
+  exit 1
+fi
 conda activate "$ENV_NAME"
 echo "[reproduce_ehr] env: $ENV_NAME  (python $(python -V 2>&1 | awk '{print $2}'))"
 
@@ -64,7 +105,7 @@ else
   echo "[reproduce_ehr] inference-path fixes present (ancestor $REPRO_COMMIT) OK"
 fi
 
-# Sanity: confirm config.py reads the env key and uses the live model (patch applied)
+# Sanity: confirm config.py reads the env key (patch applied)
 if ! grep -q 'os.environ\["OPENAI_API_KEY"\]' EhrAgent/ehragent/config.py; then
   echo "WARNING: config.py does not read OPENAI_API_KEY from env — fix may be missing." >&2
 fi
@@ -92,6 +133,7 @@ python EhrAgent/ehragent/main.py \
 RESULT_FILE="$(ls -t "$RESULT_DIR"/*.json 2>/dev/null | head -1 || true)"
 if [ -z "${RESULT_FILE:-}" ]; then
   echo "ERROR: no result JSON found under $RESULT_DIR after the run." >&2
+  echo "       Inspect $RESULT_DIR to find what main.py wrote, and adjust RESULT_DIR/glob." >&2
   exit 1
 fi
 echo "[reproduce_ehr] scoring: $RESULT_FILE"
