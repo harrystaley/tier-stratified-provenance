@@ -130,7 +130,7 @@ python EhrAgent/ehragent/main.py \
   --save_dir "$RESULT_DIR"
 
 # ---- locate the result file the run produced --------------------------------
-RESULT_FILE="$(ls -t "$RESULT_DIR"/*.json 2>/dev/null | head -1 || true)"
+RESULT_FILE="$(ls -t "$RESULT_DIR"/*/*.json "$RESULT_DIR"/*.json 2>/dev/null | head -1 || true)"
 if [ -z "${RESULT_FILE:-}" ]; then
   echo "ERROR: no result JSON found under $RESULT_DIR after the run." >&2
   echo "       Inspect $RESULT_DIR to find what main.py wrote, and adjust RESULT_DIR/glob." >&2
