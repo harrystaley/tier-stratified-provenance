@@ -41,14 +41,47 @@ mkdir -p "$SWEEP_OUT"
 # Baseline is gate-off (poison_dist irrelevant to the gate, but set for the record).
 # Threat profiles are single-tier per the paper's threat model (P_N/P_W/P_S).
 # Two gate policies: strict (W:0,N:0) and downweight (W:0.5,N:0).
+# Poison threat profiles -- attacker attestation capability as a tier distribution.
+# Two kinds of profile:
+#   PURE BUCKETS  (P_N/P_W/P_S): all poison at one tier -- clean per-tier reference
+#                                (controlled "what the gate does to tier T" rows).
+#   MIXED PROFILES (A1/A2/A3):   graduated attacker sophistication, poison spread
+#                                across tiers (realistic scenarios).
+#
+# Distributions are illustrative, modeled from the attestation-economics literature
+# (see docs/threat_model/attacker_profile_grounding.md). The literature supports the
+# ORDERING and SHAPE of a cost/capability gradient -- crypting ~$10-30 unsigned, basic
+# cert ~$299, EV cert ~$1599, stolen author-level = nation-state -- not exact per-class
+# signing rates. Proportions span that gradient; sensitivity is examined via the regime
+# sweep. NOTE: only 4 poison entries, so distributions resolve to quarters (N/4).
+#
+#   A0 unsophisticated (= P_N)  N:1.0          commodity; crypting not signing (unsigned)
+#   A1 capable                  N:0.5,W:0.5    -> 2 N, 2 W  buys basic/self-signs some payloads
+#   A2 sophisticated            W:0.5,S:0.5    -> 2 W, 2 S  APT; automated weak + occasional EV/stolen
+#   A3 state                    S:0.75,W:0.25  -> 3 S, 1 W  steals author-level; S-heavy but not pure
+#   (P_S = S:1.0 is the theoretical worst case; A3 is the realistic state actor.)
+#
+# Refs: Kim et al. CCS'17; Kwon et al. arXiv:1803.02931; Recorded Future 2018;
+#       CyberScoop 2018; TCG/TPM 2025; C2PA adoption 2026.
+#
+# Each profile is run under both gate policies (strict, downweight), plus one
+# gate-off baseline. Cell: "label | poison_dist | settings_file".
 CELLS=(
-  "baseline                | N:1.0 | settings_baseline.yaml"
-  "strict_P_N_${REGIME_LABEL}     | N:1.0 | settings_strict.yaml"
-  "strict_P_W_${REGIME_LABEL}     | W:1.0 | settings_strict.yaml"
-  "strict_P_S_${REGIME_LABEL}     | S:1.0 | settings_strict.yaml"
-  "downweight_P_N_${REGIME_LABEL} | N:1.0 | settings_downweight.yaml"
-  "downweight_P_W_${REGIME_LABEL} | W:1.0 | settings_downweight.yaml"
-  "downweight_P_S_${REGIME_LABEL} | S:1.0 | settings_downweight.yaml"
+  "baseline                       | N:1.0          | settings_baseline.yaml"
+
+  "strict_P_N_${REGIME_LABEL}            | N:1.0          | settings_strict.yaml"
+  "strict_P_W_${REGIME_LABEL}            | W:1.0          | settings_strict.yaml"
+  "strict_P_S_${REGIME_LABEL}            | S:1.0          | settings_strict.yaml"
+  "strict_A1_capable_${REGIME_LABEL}     | N:0.5,W:0.5    | settings_strict.yaml"
+  "strict_A2_sophisticated_${REGIME_LABEL} | W:0.5,S:0.5  | settings_strict.yaml"
+  "strict_A3_state_${REGIME_LABEL}       | S:0.75,W:0.25  | settings_strict.yaml"
+
+  "downweight_P_N_${REGIME_LABEL}        | N:1.0          | settings_downweight.yaml"
+  "downweight_P_W_${REGIME_LABEL}        | W:1.0          | settings_downweight.yaml"
+  "downweight_P_S_${REGIME_LABEL}        | S:1.0          | settings_downweight.yaml"
+  "downweight_A1_capable_${REGIME_LABEL} | N:0.5,W:0.5    | settings_downweight.yaml"
+  "downweight_A2_sophisticated_${REGIME_LABEL} | W:0.5,S:0.5 | settings_downweight.yaml"
+  "downweight_A3_state_${REGIME_LABEL}   | S:0.75,W:0.25  | settings_downweight.yaml"
 )
 
 SUMMARY="$SWEEP_OUT/SUMMARY_${REGIME_LABEL}.tsv"
