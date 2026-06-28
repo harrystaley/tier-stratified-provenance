@@ -78,6 +78,8 @@ ENV_DEFAULT=agentpoison
 ENV_DEFAULT_YML=environment.lock.yml
 ENV_OAI1=agentpoison-oai1
 ENV_OAI1_YML=environment-oai1.lock.yml
+ENV_OAI1_PY311=agentpoison-oai1-py311
+ENV_OAI1_PY311_YML=environment-oai1-py311.lock.yml
 
 if [ ! -d "$TIER_REPO" ]; then
   warn "could not resolve TIER_REPO; set TIER_REPO=/path/to/tier-stratified-provenance. Aborting."
@@ -189,8 +191,9 @@ if init_conda; then
       warn "env '$env_name' missing and no $yml to build it from"
     fi
   }
-  ensure_env "$ENV_DEFAULT" "$ENV_DEFAULT_YML"
-  ensure_env "$ENV_OAI1"    "$ENV_OAI1_YML"
+  ensure_env "$ENV_DEFAULT"     "$ENV_DEFAULT_YML"
+  ensure_env "$ENV_OAI1"        "$ENV_OAI1_YML"
+  ensure_env "$ENV_OAI1_PY311"  "$ENV_OAI1_PY311_YML"
   if conda activate "$ACTIVATE_ENV" 2>/dev/null; then
     ok "activated conda env: $ACTIVATE_ENV ($(python --version 2>&1))"
   else
@@ -242,7 +245,7 @@ printf '  tier repo : %s\n' "$TIER_REPO"
 printf '  ap repo   : %s\n' "$AP_REPO"
 printf '  flowcept  : %s\n' "$FLOWCEPT_REPO"
 printf '  python    : %s\n' "$(command -v python 2>/dev/null) ($(python --version 2>&1))"
-printf '  conda env : %s (active)   envs: %s, %s\n' "$ACTIVATE_ENV" "$ENV_DEFAULT" "$ENV_OAI1"
+printf '  conda env : %s (active)   envs: %s, %s, %s\n' "$ACTIVATE_ENV" "$ENV_DEFAULT" "$ENV_OAI1" "$ENV_OAI1_PY311"
 printf '  HF_HOME   : %s\n' "$HF_HOME"
 if command -v nvidia-smi >/dev/null 2>&1; then
   printf '  GPU       : %s\n' "$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1)"
