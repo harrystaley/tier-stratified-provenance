@@ -1,4 +1,0 @@
-=== BASELINE ===
-enabled: False | mode: soft | weights: {'S': 1.0, 'W': 0.5, 'N': 0.0}
-=== DEFENDED ===
-enabled: True | mode: soft | weights: {'S': 1.0, 'W': 0.5, 'N': 0.0}
