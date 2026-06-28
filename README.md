@@ -41,7 +41,7 @@ only if the attacker holds a trust-anchored key — not by assertion.
 ## Repository map
 
 ### Design & setup
-- [`design/attestation/ATTESTATION_DESIGN.md`](design/attestation/ATTESTATION_DESIGN.md) — the
+- [`design/attestation/ATTESTATION_DESIGN.md`](docs/design/attestation/ATTESTATION_DESIGN.md) — the
   tier substrate design and integration record (compute_tier, validators, annotate).
 - [`docs/SETUP_PLAN.md`](docs/SETUP_PLAN.md) — staged runbook for standing up the full stack
   (Flowcept, AgentPoison, the conda environment) in dependency order.
