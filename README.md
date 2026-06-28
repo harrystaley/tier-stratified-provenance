@@ -41,7 +41,7 @@ only if the attacker holds a trust-anchored key — not by assertion.
 ## Repository map
 
 ### Design & setup
-- [`design/attestation/ATTESTATION_DESIGN.md`](docs/design/attestation/ATTESTATION_DESIGN.md) — the
+- [`docs/design/attestation/ATTESTATION_DESIGN.md`](docs/design/attestation/ATTESTATION_DESIGN.md) — the
   tier substrate design and integration record (compute_tier, validators, annotate).
 - [`docs/SETUP_PLAN.md`](docs/SETUP_PLAN.md) — staged runbook for standing up the full stack
   (Flowcept, AgentPoison, the conda environment) in dependency order.
@@ -92,7 +92,6 @@ config/        canonical gate-policy settings (baseline / strict / down-weight)
 scripts/       run_sweep.sh, reproduce_ehr.sh, make_results_table.py, ...
 evidence/      RESULTS.md, the capability sweep (sweep/), clean-split (baseline/, defended/)
 docs/          design, setup, reproduction runbooks, deviations, threat model
-design/        the attestation substrate design record
 patches/       AgentPoison reproduction + attestation-tiering patches
 environment/   conda environment specs and lockfiles
 ```
