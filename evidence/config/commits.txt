@@ -1,0 +1,11 @@
+=== AgentPoison ===
+81a47eefa783371239dfba492b8ebbe8995d8634
+81a47ee Add attestation tier support and retrieval gating in MedAgent
+=== Flowcept ===
+252c9a51d3de665d4978a74fa1b53428cfbac299
+252c9a51 Added `flowcept_retrieval_task` decorator and `gate_retrieval` function for source-attestation support in retrieval tasks.
+=== tier-stratified-provenance ===
+b62e7bce5d6415bcc252d4ae615986a27f3abd98
+b62e7bc Turnkey EHRAgent reproduction verified (ASR-r 100.0/PASS); env-agnostic setup.sh; reorg path fixes
+Flowcept post-fix SHA: 8a7fb663d71c8edf0e700172f5bf31215927f587
+Flowcept post-fix SHA: 8a7fb663d71c8edf0e700172f5bf31215927f587
