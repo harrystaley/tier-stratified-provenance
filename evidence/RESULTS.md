@@ -175,8 +175,8 @@ python scripts/make_results_table.py evidence/sweep/SUMMARY_R1.tsv > evidence/ta
 export FLOWCEPT_SETTINGS_PATH=$(pwd)/config/settings_baseline.yaml
 ENV_NAME=agentpoison-oai1-py311 bash scripts/reproduce_ehr.sh
 
-# Defended (gate on) — expect ASR-r 0.0  (uses the current strict policy)
-export FLOWCEPT_SETTINGS_PATH=$(pwd)/config/settings_strict.yaml
+# Defended (gate on) — expect ASR-r 0.0  (uses down-weight, matching the original W:0.5 defended run)
+export FLOWCEPT_SETTINGS_PATH=$(pwd)/config/settings_downweight.yaml
 ENV_NAME=agentpoison-oai1-py311 bash scripts/reproduce_ehr.sh
 ```
 
