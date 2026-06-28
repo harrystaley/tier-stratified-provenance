@@ -1,21 +1,36 @@
 #!/usr/bin/env bash
 # =============================================================================
-# run_sweep.sh — EHRAgent attestation-gate evaluation sweep
+# run_sweep.sh — EHRAgent attestation-gate evaluation sweep (capability model)
 #
-# Loops the focused-design cells (poison threat profile x gate policy, at a
-# fixed deployment regime), running reproduce_ehr.sh for each. Per cell it sets:
-#   ATTEST_POISON_DISTRIBUTION   (threat profile; poison tier distribution)
-#   ATTEST_LEGIT_DISTRIBUTION    (deployment regime; legit tier distribution)
-#   FLOWCEPT_SETTINGS_PATH       (gate policy; config/settings_*.yaml)
+# Tiers are DERIVED by validating a real ed25519 signature carried with each
+# entry (PkiValidator + compute_tier), NOT assigned. Each cell therefore sets a
+# signing CAPABILITY for poison and an adoption distribution for legit content;
+# the attestation tier is the validation outcome.
+#
+# Per cell it sets:
+#   ATTEST_POISON_CAPABILITY      attacker capability (none|untrusted|root)
+#                                   none      -> unsigned             -> T_N
+#                                   untrusted -> self-signed          -> T_W
+#                                   root      -> trust-anchored key    -> T_S
+#                                                (models a COMPROMISED anchor)
+#   ATTEST_LEGIT_CAPABILITY_DIST  deployment regime as an adoption distribution
+#                                   over signing capabilities (none/untrusted/root)
+#   FLOWCEPT_SETTINGS_PATH        gate policy (config/settings_*.yaml)
 # and copies the result JSON + full log to evidence/sweep/<label>/, then prints
 # a summary table of ASR-r per cell.
+#
+# The three poison capabilities are the real attacker-capability ladder
+# (commodity / capable / state). Because each profile is a SINGLE capability and
+# the tier is derived per-entry by validation, there is no tier-proportion knob
+# and no stratification artifact: a poison entry reaches T_S only if the attacker
+# signs with a key that chains to the trust root.
 #
 # Usage:
 #   export OPENAI_API_KEY=sk-...
 #   bash scripts/run_sweep.sh
 #
 # Overridable:
-#   REGIME_LABEL / LEGIT_DIST   (default R1 / "N:0.80,W:0.15,S:0.05")
+#   REGIME_LABEL / LEGIT_CAP_DIST  (default R1 / "none:0.80,untrusted:0.15,root:0.05")
 #   ENV_NAME (default agentpoison-oai1-py311), AGENTPOISON_DIR, NUM_QUESTIONS
 #   SWEEP_OUT (default evidence/sweep)
 # =============================================================================
@@ -29,83 +44,69 @@ SWEEP_OUT="${SWEEP_OUT:-$REPO_ROOT/evidence/sweep}"
 ENV_NAME="${ENV_NAME:-agentpoison-oai1-py311}"
 REPRO="$REPO_ROOT/scripts/reproduce_ehr.sh"
 
-# ---- deployment regime (legit tier distribution), fixed across the sweep ----
+# ---- deployment regime: legit adoption distribution, fixed across the sweep ----
+# Regime = what fraction of legitimate publishers have adopted which signing
+# capability. R1 (commodity): mostly unsigned, little strong adoption. The tier
+# of each legit entry is DERIVED by validating whatever signature it carries.
 REGIME_LABEL="${REGIME_LABEL:-R1}"
-LEGIT_DIST="${LEGIT_DIST:-N:0.80,W:0.15,S:0.05}"   # R1 commodity (Table 2)
+LEGIT_CAP_DIST="${LEGIT_CAP_DIST:-none:0.80,untrusted:0.15,root:0.05}"   # R1 commodity
 
 : "${OPENAI_API_KEY:?Set OPENAI_API_KEY (export OPENAI_API_KEY=sk-...)}"
 mkdir -p "$SWEEP_OUT"
 
 # ---- the sweep cells --------------------------------------------------------
-# Each cell: "label | poison_dist | settings_file"
-# Baseline is gate-off (poison_dist irrelevant to the gate, but set for the record).
-# Threat profiles are single-tier per the paper's threat model (P_N/P_W/P_S).
-# Two gate policies: strict (W:0,N:0) and downweight (W:0.5,N:0).
-# Poison threat profiles -- attacker attestation capability as a tier distribution.
-# Two kinds of profile:
-#   PURE BUCKETS  (P_N/P_W/P_S): all poison at one tier -- clean per-tier reference
-#                                (controlled "what the gate does to tier T" rows).
-#   MIXED PROFILES (A1/A2/A3):   graduated attacker sophistication, poison spread
-#                                across tiers (realistic scenarios).
+# Each cell: "label | poison_capability | settings_file"
 #
-# Distributions are illustrative, modeled from the attestation-economics literature
-# (see docs/threat_model/attacker_profile_grounding.md). The literature supports the
-# ORDERING and SHAPE of a cost/capability gradient -- crypting ~$10-30 unsigned, basic
-# cert ~$299, EV cert ~$1599, stolen author-level = nation-state -- not exact per-class
-# signing rates. Proportions span that gradient; sensitivity is examined via the regime
-# sweep. NOTE: only 4 poison entries, so distributions resolve to quarters (N/4).
+# Poison capability is the attacker-capability ladder (single capability per
+# profile -- the attacker signs all poison with what they can obtain):
+#   commodity  -> none      -> poison unsigned       -> T_N  (gate drops it)
+#   capable    -> untrusted -> poison self-signed    -> T_W  (strict drops; downweight penalizes)
+#   state      -> root      -> poison anchor-signed  -> T_S  (passes gate; residual risk)
 #
-#   A0 unsophisticated (= P_N)  N:1.0          commodity; crypting not signing (unsigned)
-#   A1 capable                  N:0.5,W:0.5    -> 2 N, 2 W  buys basic/self-signs some payloads
-#   A2 sophisticated            W:0.5,S:0.5    -> 2 W, 2 S  APT; automated weak + occasional EV/stolen
-#   A3 state                    S:0.75,W:0.25  -> 3 S, 1 W  steals author-level; S-heavy but not pure
-#   (P_S = S:1.0 is the theoretical worst case; A3 is the realistic state actor.)
+# "state -> root" models an attacker who has COMPROMISED a trust-anchored key
+# (e.g. a stolen author/CA key). This is the honest condition under which poison
+# reaches T_S: not "sophistication," but key compromise. See the threat-model
+# grounding (docs/threat_model/attacker_profile_grounding.md) for the cost/
+# capability ladder this maps onto (crypting unsigned -> certs -> stolen keys).
 #
-# Refs: Kim et al. CCS'17; Kwon et al. arXiv:1803.02931; Recorded Future 2018;
-#       CyberScoop 2018; TCG/TPM 2025; C2PA adoption 2026.
-#
-# Each profile is run under both gate policies (strict, downweight), plus one
-# gate-off baseline. Cell: "label | poison_dist | settings_file".
+# Two gate policies: strict (W:0,N:0 -> S-only) and downweight (W:0.5,N:0).
+# Plus one gate-off baseline. Baseline's capability is irrelevant (no gating).
 CELLS=(
-  "baseline                       | N:1.0          | settings_baseline.yaml"
+  "baseline                          | none      | settings_baseline.yaml"
 
-  "strict_P_N_${REGIME_LABEL}            | N:1.0          | settings_strict.yaml"
-  "strict_P_W_${REGIME_LABEL}            | W:1.0          | settings_strict.yaml"
-  "strict_P_S_${REGIME_LABEL}            | S:1.0          | settings_strict.yaml"
-  "strict_A1_capable_${REGIME_LABEL}     | N:0.5,W:0.5    | settings_strict.yaml"
-  "strict_A2_sophisticated_${REGIME_LABEL} | W:0.5,S:0.5  | settings_strict.yaml"
-  "strict_A3_state_${REGIME_LABEL}       | S:0.75,W:0.25  | settings_strict.yaml"
+  "strict_commodity_${REGIME_LABEL}        | none      | settings_strict.yaml"
+  "strict_capable_${REGIME_LABEL}          | untrusted | settings_strict.yaml"
+  "strict_state_${REGIME_LABEL}            | root      | settings_strict.yaml"
 
-  "downweight_P_N_${REGIME_LABEL}        | N:1.0          | settings_downweight.yaml"
-  "downweight_P_W_${REGIME_LABEL}        | W:1.0          | settings_downweight.yaml"
-  "downweight_P_S_${REGIME_LABEL}        | S:1.0          | settings_downweight.yaml"
-  "downweight_A1_capable_${REGIME_LABEL} | N:0.5,W:0.5    | settings_downweight.yaml"
-  "downweight_A2_sophisticated_${REGIME_LABEL} | W:0.5,S:0.5 | settings_downweight.yaml"
-  "downweight_A3_state_${REGIME_LABEL}   | S:0.75,W:0.25  | settings_downweight.yaml"
+  "downweight_commodity_${REGIME_LABEL}    | none      | settings_downweight.yaml"
+  "downweight_capable_${REGIME_LABEL}      | untrusted | settings_downweight.yaml"
+  "downweight_state_${REGIME_LABEL}        | root      | settings_downweight.yaml"
 )
 
 SUMMARY="$SWEEP_OUT/SUMMARY_${REGIME_LABEL}.tsv"
-echo -e "label\tpoison\tlegit_regime\tpolicy\tASR-r(%)\tresult" > "$SUMMARY"
+echo -e "label\tpoison_cap\tlegit_regime\tpolicy\tASR-r(%)\tresult" > "$SUMMARY"
 
 echo "=============================================================="
-echo " SWEEP: regime=$REGIME_LABEL  legit=$LEGIT_DIST  env=$ENV_NAME"
+echo " SWEEP (capability model): regime=$REGIME_LABEL"
+echo " legit adoption=$LEGIT_CAP_DIST  env=$ENV_NAME"
 echo " cells: ${#CELLS[@]}   out: $SWEEP_OUT"
 echo "=============================================================="
 
 for cell in "${CELLS[@]}"; do
-  label="$(echo "$cell"   | cut -d'|' -f1 | xargs)"
-  poison="$(echo "$cell"  | cut -d'|' -f2 | xargs)"
-  sfile="$(echo "$cell"   | cut -d'|' -f3 | xargs)"
+  label="$(echo "$cell"  | cut -d'|' -f1 | xargs)"
+  pcap="$(echo "$cell"   | cut -d'|' -f2 | xargs)"
+  sfile="$(echo "$cell"  | cut -d'|' -f3 | xargs)"
   outdir="$SWEEP_OUT/$label"
   mkdir -p "$outdir"
   log="$outdir/run.log"
 
   echo ""
-  echo "---- CELL: $label  (poison=$poison, policy=$sfile) ----"
+  echo "---- CELL: $label  (poison_cap=$pcap, policy=$sfile) ----"
 
-  # gate off for baseline => no legit/poison tiering effect, but set vars anyway for provenance
-  export ATTEST_POISON_DISTRIBUTION="$poison"
-  export ATTEST_LEGIT_DISTRIBUTION="$LEGIT_DIST"
+  # Capability-driven: poison signs with $pcap; legit follows the regime adoption
+  # distribution. Tiers are derived by validating the resulting signatures.
+  export ATTEST_POISON_CAPABILITY="$pcap"
+  export ATTEST_LEGIT_CAPABILITY_DIST="$LEGIT_CAP_DIST"
   export FLOWCEPT_SETTINGS_PATH="$CONFIG_DIR/$sfile"
 
   # run; capture everything; do NOT let exit 2 (OUT-OF-BAND) abort the sweep
@@ -132,7 +133,7 @@ for cell in "${CELLS[@]}"; do
     *) pol="$sfile";;
   esac
 
-  echo -e "${label}\t${poison}\t${LEGIT_DIST}\t${pol}\t${asrr}\t${result}" >> "$SUMMARY"
+  echo -e "${label}\t${pcap}\t${LEGIT_CAP_DIST}\t${pol}\t${asrr}\t${result}" >> "$SUMMARY"
   echo "   ASR-r=${asrr}%  ($result)   -> $outdir"
 done
 
@@ -140,4 +141,4 @@ echo ""
 echo "=============================================================="
 echo " SWEEP COMPLETE — summary: $SUMMARY"
 echo "=============================================================="
-column -t -s $'\t' "$SUMMARY"
+column -t -s $'\t' "$SUMMARY" 2>/dev/null || cat "$SUMMARY"
