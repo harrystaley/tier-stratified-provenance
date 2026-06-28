@@ -1,0 +1,8 @@
+label	poison_cap	legit_regime	policy	ASR-r(%)	result
+baseline	none	none:0.80,untrusted:0.15,root:0.05	baseline(off)	100.0	PASS
+strict_commodity_R1	none	none:0.80,untrusted:0.15,root:0.05	strict(W0,N0)	0.0	OUT-OF-BAND
+strict_capable_R1	untrusted	none:0.80,untrusted:0.15,root:0.05	strict(W0,N0)	0.0	OUT-OF-BAND
+strict_state_R1	root	none:0.80,untrusted:0.15,root:0.05	strict(W0,N0)	100.0	PASS
+downweight_commodity_R1	none	none:0.80,untrusted:0.15,root:0.05	downweight(W.5,N0)	0.0	OUT-OF-BAND
+downweight_capable_R1	untrusted	none:0.80,untrusted:0.15,root:0.05	downweight(W.5,N0)	0.0	OUT-OF-BAND
+downweight_state_R1	root	none:0.80,untrusted:0.15,root:0.05	downweight(W.5,N0)	100.0	PASS
