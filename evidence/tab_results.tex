@@ -1,0 +1,22 @@
+\begin{table}[t]
+    \centering
+    \caption{Retrieval attack success rate (ASR-r, \%) on EHRAgent under the attestation gate, by attacker signing capability and gate policy. Attestation tiers are \emph{derived} by validating a real ed25519 signature carried with each entry (not assigned). Deployment regime R1 (legit adoption $\langle T_N,T_W,T_S\rangle=\langle0.80,0.15,0.05\rangle$). Lower is better; the gate-off baseline reproduces the undefended attack.}
+    \label{tab:results}
+    \begin{tabular}{llcc}
+        \toprule
+        Attacker & Poison tier & \multicolumn{2}{c}{ASR-r (\%) by gate policy} \\
+        \cmidrule(lr){3-4}
+        capability & (derived) & Strict & Down-weight \\
+        & & {\footnotesize $\langle T_S,T_W,T_N\rangle$} & {\footnotesize $\langle T_S,T_W,T_N\rangle$} \\
+        & & {\footnotesize $=\langle1,0,0\rangle$} & {\footnotesize $=\langle1,0.5,0\rangle$} \\
+        \midrule
+        Baseline (gate off) & \textemdash & \multicolumn{2}{c}{100} \\
+        \midrule
+        Commodity & $T_N$ (unsigned) & 0 & 0 \\
+        Capable & $T_W$ (self-signed) & 0 & 0 \\
+        State & $T_S$ (anchor-signed$^{\dagger}$) & 100 & 100 \\
+        \bottomrule
+    \end{tabular}
+    \par\smallskip
+    {\footnotesize $^{\dagger}$Poison reaches $T_S$ only by signing with a key that chains to the trust root, i.e.\ a \emph{compromised trust anchor}; forged or tampered claims fail validation and remain $T_W$/$T_N$.}
+\end{table}
