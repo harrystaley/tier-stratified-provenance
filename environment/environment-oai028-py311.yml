@@ -1,0 +1,84 @@
+# environment-oai028-py311.yml
+# ---------------------------------------------------------------------------
+# Intent-level spec for the StrategyQA / Flowcept evaluation environment.
+#   Python 3.11, openai 0.28 (legacy Completion API), Flowcept-enabled.
+#
+# This env exists to run the ReAct-StrategyQA benchmark (which calls the legacy
+# openai.Completion.create API, requiring openai==0.28) on Python 3.11, so that
+# Flowcept (requires-python >=3.11) can be imported DIRECTLY by the attestation
+# gate -- no vendoring. It is the StrategyQA counterpart to agentpoison-oai1-py311
+# (which carries openai 1.x for EHRAgent).
+#
+# This file documents WHAT the env is for and the non-obvious build steps. The
+# byte-exact source of truth is:
+#     environment-oai028-py311.lock.yml   (full conda export)
+# For an exact rebuild on the same platform, use the lock; clone is faster still:
+#     conda create -n agentpoison-oai028-py311 --clone agentpoison-oai1-py311
+#     conda activate agentpoison-oai028-py311 && pip install openai==0.28
+#
+# ---------------------------------------------------------------------------
+# BUILD NOTES (steps a plain `conda env create` cannot express)
+#
+#   1. Torch must come from the CUDA 11.7 wheel index, NOT PyPI default, or pip
+#      pulls a mismatched CUDA build (the cu130 drift incident):
+#        pip install torch==2.0.1+cu117 torchvision==0.15.2+cu117 \
+#            --index-url https://download.pytorch.org/whl/cu117
+#      triton==2.0.0 is the matching pin.
+#
+#   2. timm==0.6.13, if installed unpinned, drags an unpinned torchvision that
+#      re-pulls the wrong torch. Install it AFTER torch is pinned and verify
+#      torch is still 2.0.1+cu117.
+#
+#   3. Flowcept is installed EDITABLE, --no-deps, from the sibling repo:
+#        pip install -e ../flowcept --no-deps
+#      (msgpack is its one manual dep, listed below.) Under Python 3.11 this
+#      imports directly -- the gate calls flowcept.commons.attestation.tier.
+#
+#   4. openai is pinned to 0.28 for StrategyQA's legacy Completion.create API.
+#      cryptography is the PKI-validator backend (ed25519).
+# ---------------------------------------------------------------------------
+name: agentpoison-oai028-py311
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      # --- core ML / retriever stack (torch via cu117 index; see build note 1) ---
+      - torch==2.0.1+cu117
+      - torchvision==0.15.2+cu117
+      - triton==2.0.0
+      - transformers==4.39.1
+      - tokenizers==0.15.0
+      - accelerate==0.26.1
+      - sentence-transformers==3.1.1
+      - bitsandbytes==0.41.1
+      - peft==0.2.0
+      - timm==0.6.13            # see build note 2 (torchvision drift hazard)
+      - numpy==1.24.3
+      - scikit-learn==1.6.1
+      - datasets==2.18.0
+
+      # --- LLM / agent layer ---
+      - openai==0.28            # legacy Completion API (StrategyQA); see build note 4
+      - tiktoken==0.13.0
+      - pyautogen==0.2.0
+      - flaml==2.3.6
+
+      # --- attestation substrate ---
+      # flowcept: installed editable --no-deps from ../flowcept (see build note 3)
+      - cryptography==49.0.0    # PKI validator backend (ed25519)
+      - msgpack==1.2.1          # flowcept manual dep (not pulled by --no-deps)
+
+      # --- StrategyQA / ReAct retrieval deps ---
+      - gym==0.26.2
+      - beautifulsoup4==4.15.0
+      - bs4==0.0.2
+
+      # --- data / utility ---
+      - pandas==2.1.4
+      - scipy==1.13.1
+      - tqdm==4.64.1
+      - pyyaml==6.0
+      - python-dotenv==1.2.1
+      - wandb==0.26.1
