@@ -76,7 +76,7 @@ only if the attacker holds a trust-anchored key — not by assertion.
 export OPENAI_API_KEY=sk-...
 
 # run the capability-model sweep (regime R1): commodity/capable/state x strict/down-weight
-bash scripts/run_sweep.sh                  # writes evidence/sweep/SUMMARY_R1.tsv + per-cell evidence
+bash scripts/ehra_run_sweep.sh                  # writes evidence/sweep/SUMMARY_R1.tsv + per-cell evidence
 
 # render the results table
 python scripts/make_results_table.py evidence/sweep/SUMMARY_R1.tsv > evidence/tab_results.tex
@@ -89,7 +89,7 @@ For the clean-split mechanism demonstration and full reproduction details, see
 
 ```
 config/        canonical gate-policy settings (baseline / strict / down-weight)
-scripts/       run_sweep.sh, reproduce_ehr.sh, make_results_table.py, ...
+scripts/       ehra_run_sweep.sh, reproduce_ehr.sh, make_results_table.py, ...
 evidence/      RESULTS.md, the capability sweep (sweep/), clean-split (baseline/, defended/)
 docs/          design, setup, reproduction runbooks, deviations, threat model
 patches/       AgentPoison reproduction + attestation-tiering patches

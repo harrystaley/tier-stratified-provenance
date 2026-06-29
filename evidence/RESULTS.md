@@ -164,7 +164,7 @@ Environment: conda env `agentpoison-oai1-py311` (Python 3.11.15, torch 2.0.1+cu1
 
 ```bash
 export OPENAI_API_KEY=sk-...
-bash scripts/run_sweep.sh          # writes sweep/SUMMARY_R1.tsv + per-cell evidence
+bash scripts/ehra_run_sweep.sh          # writes sweep/SUMMARY_R1.tsv + per-cell evidence
 python scripts/make_results_table.py evidence/sweep/SUMMARY_R1.tsv > evidence/tab_results.tex
 ```
 
