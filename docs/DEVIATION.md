@@ -257,3 +257,47 @@ to 700 is out of scope for the gate.
 fitness 62.63). This is an experiment-specific config, not a run-enabling fix; if the
 run-enabling subset (imports, env key, model) is ever offered upstream, the trigger
 line should be excluded.
+## StrategyQA ported to openai 1.x (supersedes the 0.28-only constraint above)
+
+The two-environment split described above ("Environments: openai 0.28 vs 1.x")
+stated that StrategyQA reproduction *requires* the legacy openai 0.28 env. That
+constraint is now lifted for the attestation-gated runs: StrategyQA's inference
+was ported to the openai 1.x SDK so it runs in the py311 env where flowcept
+imports natively.
+
+### What changed
+ReAct/run_strategyqa_gpt3.5.py and ReAct/run_strategyqa_inference.py ported from
+openai 0.28 (openai.Completion.create, openai.error.InvalidRequestError) to
+openai 1.x (client.completions.create, openai.BadRequestError). The 1.x response
+object is converted back to the same dict shape the ReAct loop consumes, so no
+downstream logic changed.
+
+### What was preserved (experiment-invariant)
+- Victim model: gpt-3.5-turbo-instruct (unchanged)
+- Endpoint: completions (NOT switched to chat-completions)
+- Decoding: temperature=0, max_tokens=128, logprobs=1, stop, penalties (unchanged)
+
+### Why
+flowcept requires Python >=3.11. The legacy 0.28 StrategyQA env was Python 3.9,
+so flowcept could not be imported there (the attestation tier logic the gate reads
+lives in flowcept). Porting the inference to 1.x lets StrategyQA run in the existing
+py311 env (agentpoison-oai1-py311), where torch 2.0.1+cu117, gym, openai 1.x, and
+flowcept all import together. This dissolves the Python-version conflict without
+vendoring flowcept.
+
+### Re-validation
+Condition-1 baseline (DPR, adversarial, gate OFF) reproduced at ASR-r = 56.8%
+(n=229), within the reproduction band 55.5-75.5 (AgentPoison reports 65.5). ASR-r
+is retrieval-decided and reproduced in band, confirming the port preserves the
+attack. AgentPoison commit: 07ba5df (branch feature/strategyqa-openai-1x).
+
+### Related fix
+ReAct/local_wikienv.py: structural-overlay import corrected from
+`from ReAct.attestation_structural import` to bare `from attestation_structural
+import`, matching AgentPoison's convention (ReAct is not a package; the run script
+puts ReAct/ on sys.path via `python ReAct/run_strategyqa_gpt3.5.py`).
+
+### Note on the existing 0.28 env
+The 0.28 env (agentpoison) and the existing import-guard deviations above remain
+accurate for trigger optimization and the original 0.28 reproduction path. The
+1.x port is the path used for the attestation-gated StrategyQA evaluation.
