@@ -60,9 +60,11 @@ only if the attacker holds a trust-anchored key — not by assertion.
 - [`docs/DEVIATION.md`](docs/DEVIATION.md) — documented deviations from upstream AgentPoison.
 
 ### Evaluation — the attestation-gate defense
-- [`evidence/RESULTS.md`](evidence/RESULTS.md) — the core results, in two layers: the clean-split
-  mechanism demonstration (assigned tiers, 100→0) and the capability-model evaluation (derived
-  tiers, commodity/capable/state × strict/down-weight).
+- [`evidence/RESULTS.md`](evidence/RESULTS.md) — the core results across two benchmarks. EHRAgent
+  (PKI attestation), in two layers: the clean-split mechanism demonstration (assigned tiers, 100→0)
+  and the capability-model evaluation (derived tiers, commodity/capable/state × strict/down-weight).
+  StrategyQA (structural attestation): the manifest-membership capability sweep (none/forge/member
+  → T_N/T_N/T_W), with a cross-benchmark synthesis tying the two mechanisms together.
 - [`docs/threat_model/attacker_profile_grounding.md`](docs/threat_model/attacker_profile_grounding.md)
   — empirical grounding for the commodity/capable/state capability ladder (attestation-economics
   literature, IEEE refs).
@@ -90,7 +92,7 @@ For the clean-split mechanism demonstration and full reproduction details, see
 ```
 config/        canonical gate-policy settings (baseline / strict / down-weight)
 scripts/       ehra_run_sweep.sh, reproduce_ehr.sh, make_results_table.py, ...
-evidence/      RESULTS.md, the capability sweep (sweep/), clean-split (baseline/, defended/)
+evidence/      RESULTS.md, EHRAgent sweep (sweep/) + clean-split (baseline/, defended/), StrategyQA sweep (sweep_strategyqa/)
 docs/          design, setup, reproduction runbooks, deviations, threat model
 patches/       AgentPoison reproduction + attestation-tiering patches
 environment/   conda environment specs and lockfiles
