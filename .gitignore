@@ -266,3 +266,5 @@ xcuserdata/
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,visualstudiocode,jetbrains,linux,xcode
 .env
+setup.sh.bak
+*.bak
