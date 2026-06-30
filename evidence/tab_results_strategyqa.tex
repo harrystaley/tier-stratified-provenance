@@ -1,0 +1,19 @@
+\begin{table}[t]
+\centering
+\caption{Retrieval attack success rate (ASR-r, \%) on ReAct-StrategyQA under the structural attestation gate, by attacker capability. Attestation tiers are \emph{derived} by validating provenance-handle membership in the genuine corpus manifest (9{,}251 Wikipedia handles), not by signature. Gate policy is down-weight $\langle T_S,T_W,T_N\rangle=\langle1,0.5,0\rangle$; legitimate encyclopedic content is $T_W$ (manifest membership establishes resolution/custody binding, not author identity). Lower is better; the gate-off baseline reproduces the undefended attack.}
+\label{tab:results-strategyqa}
+\begin{tabular}{llc}
+\toprule
+Attacker & Poison tier & ASR-r (\%) \\
+capability & (derived) & (down-weight) \\
+\midrule
+Baseline (gate off) & \textemdash & 56.8 \\
+\midrule
+Commodity & $T_N$ (no handle) & 0.0 \\
+Forging & $T_N$ (fabricated handle$^{\dagger}$) & 0.0 \\
+Compromise & $T_W$ (manifest member$^{\ddagger}$) & 56.8 \\
+\bottomrule
+\end{tabular}
+\par\smallskip
+{\footnotesize $^{\dagger}$A forged handle is \emph{not} in the manifest, so it fails membership and remains $T_N$: structural attestation has no self-signing analogue, and forging cannot reach $T_W$ (contrast PKI, where a self-signature reaches $T_W$). $^{\ddagger}$Poison reaches $T_W$ only when the corpus itself is compromised so the poison handle is a genuine manifest member, i.e.\ a compromised structural trust root.}
+\end{table}
