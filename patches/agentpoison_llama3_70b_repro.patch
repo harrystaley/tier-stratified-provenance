@@ -1,7 +1,7 @@
 diff --git a/ReAct/run_strategyqa_inference.py b/ReAct/run_strategyqa_inference.py
-index ce58b08..fixed01 100755
---- a/ReAct/run_strategyqa_inference.py	2026-07-02 12:55:02.232059194 +0000
-+++ b/ReAct/run_strategyqa_inference.py	2026-07-02 12:55:02.236206562 +0000
+index ce58b08..fixed02 100755
+--- a/ReAct/run_strategyqa_inference.py	2026-07-02 14:33:12.829069700 +0000
++++ b/ReAct/run_strategyqa_inference.py	2026-07-02 14:33:12.831247823 +0000
 @@ -7,7 +7,7 @@
  from tqdm import tqdm
  from uncertainty_utils import *
@@ -27,7 +27,7 @@ index ce58b08..fixed01 100755
 +    _cut_char = None
 +    _acc = ""
 +    for _j in range(len(_tok_ids)):
-+        _acc = tokenizer.decode(_tok_ids[:_j + 1])
++        _acc = tokenizer.decode(_tok_ids[:_j + 1], skip_special_tokens=True)
 +        _hit = None
 +        for _s in _stop_list:
 +            _pos = _acc.find(_s)
@@ -41,7 +41,7 @@ index ce58b08..fixed01 100755
 +    if _cut_char is not None:
 +        output = _acc[:_cut_char]
 +    else:
-+        output = tokenizer.decode(_tok_ids)
++        output = tokenizer.decode(_tok_ids, skip_special_tokens=True)
  
      if return_probs:
          transition_scores = model.compute_transition_scores(
