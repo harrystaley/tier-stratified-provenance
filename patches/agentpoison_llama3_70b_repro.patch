@@ -1,8 +1,8 @@
 diff --git a/ReAct/run_strategyqa_inference.py b/ReAct/run_strategyqa_inference.py
-index ce58b08..ccfdc50 100755
---- a/ReAct/run_strategyqa_inference.py
-+++ b/ReAct/run_strategyqa_inference.py
-@@ -7,7 +7,7 @@ import local_wikienv, wrappers
+index ce58b08..fixed01 100755
+--- a/ReAct/run_strategyqa_inference.py	2026-07-02 12:55:02.232059194 +0000
++++ b/ReAct/run_strategyqa_inference.py	2026-07-02 12:55:02.236206562 +0000
+@@ -7,7 +7,7 @@
  from tqdm import tqdm
  from uncertainty_utils import *
  import requests
@@ -11,7 +11,49 @@ index ce58b08..ccfdc50 100755
  import torch
  import argparse
  import replicate
-@@ -120,12 +120,19 @@ if args.backbone == "gpt":
+@@ -85,14 +85,39 @@
+ 
+     input_length = input_ids.shape[1]
+     generated_tokens = generation_output.sequences[:, input_length:]
+-    output = tokenizer.decode(generated_tokens[0])
++
++    # Apply string stop-sequences (upstream `gpt` path passes `stop=` to the
++    # OpenAI API; model.generate does not, so replicate it here). Decode
++    # incrementally and cut BOTH the text and the token span at the earliest
++    # stop-string occurrence, keeping `output` and `prob_dicts` aligned.
++    _tok_ids = generated_tokens[0]
++    _stop_list = stop if stop else []
++    _cut_tok = len(_tok_ids)
++    _cut_char = None
++    _acc = ""
++    for _j in range(len(_tok_ids)):
++        _acc = tokenizer.decode(_tok_ids[:_j + 1])
++        _hit = None
++        for _s in _stop_list:
++            _pos = _acc.find(_s)
++            if _pos != -1:
++                _hit = _pos
++                break
++        if _hit is not None:
++            _cut_tok = _j + 1
++            _cut_char = _hit
++            break
++    if _cut_char is not None:
++        output = _acc[:_cut_char]
++    else:
++        output = tokenizer.decode(_tok_ids)
+ 
+     if return_probs:
+         transition_scores = model.compute_transition_scores(
+             generation_output.sequences, generation_output.scores, normalize_logits=True
+         )
+         prob_dicts = []
+-        for tok, score in zip(generated_tokens[0], transition_scores[0]):
++        for tok, score in zip(_tok_ids[:_cut_tok], transition_scores[0][:_cut_tok]):
+             prob_dicts.append({tokenizer.decode(tok):score.cpu().tolist()})
+ 
+         return output, prob_dicts
+@@ -120,12 +145,19 @@
  elif args.backbone == "llama3-local":
      save_file_name = f"ReAct/outputs/llama3-strategyqa-dev-react-{embedder}-{algo}-{task_type}.jsonl" # saved file name
  
@@ -33,7 +75,7 @@ index ce58b08..ccfdc50 100755
          device_map="auto",
      )
      llm = llama3
-@@ -137,7 +144,8 @@ elif args.backbone == "llama3":
+@@ -137,7 +169,8 @@
  
  if algo == "ap":
      # trigger_token_list = ['[CLS]', 'kelsey', 'rocked', 'stench', 'distinguish', 'the', 'useful', '[MASK]', 'blast', 'realized', '[SEP]', 'problem', 'rand', 'ᅢ']
