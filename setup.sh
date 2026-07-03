@@ -78,8 +78,6 @@ ENV_DEFAULT=agentpoison
 ENV_DEFAULT_YML=environment.lock.yml
 ENV_OAI1=agentpoison-oai1
 ENV_OAI1_YML=environment-oai1.lock.yml
-ENV_OAI1_PY311=agentpoison-oai1-py311
-ENV_OAI1_PY311_YML=environment-oai1-py311.lock.yml
 
 if [ ! -d "$TIER_REPO" ]; then
   warn "could not resolve TIER_REPO; set TIER_REPO=/path/to/tier-stratified-provenance. Aborting."
@@ -111,6 +109,23 @@ if [ "$_is_runpod" = "1" ]; then
   fi
   ssh-keyscan -t ecdsa,ed25519,rsa github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null
   sort -u "$HOME/.ssh/known_hosts" -o "$HOME/.ssh/known_hosts" 2>/dev/null
+
+  # Ensure tmux is installed (long runs must survive SSH disconnects; a foreground
+  # run in an SSH session is killed by SIGHUP on drop). Idempotent: only installs if
+  # missing. Non-fatal: warns and continues if apt is unavailable or offline.
+  if command -v tmux >/dev/null 2>&1; then
+    ok "tmux present: $(tmux -V 2>/dev/null)"
+  elif command -v apt-get >/dev/null 2>&1; then
+    say "installing tmux (one-time; for disconnect-proof long runs)..."
+    if DEBIAN_FRONTEND=noninteractive apt-get update -qq >/dev/null 2>&1 \
+       && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq tmux >/dev/null 2>&1; then
+      ok "installed tmux: $(tmux -V 2>/dev/null)"
+    else
+      warn "tmux install failed (offline or apt issue); run long jobs under nohup instead."
+    fi
+  else
+    warn "tmux not found and apt-get unavailable; run long jobs under nohup to survive disconnects."
+  fi
 else
   ok "non-RunPod environment: using your existing SSH config as-is"
 fi
@@ -191,9 +206,8 @@ if init_conda; then
       warn "env '$env_name' missing and no $yml to build it from"
     fi
   }
-  ensure_env "$ENV_DEFAULT"     "$ENV_DEFAULT_YML"
-  ensure_env "$ENV_OAI1"        "$ENV_OAI1_YML"
-  ensure_env "$ENV_OAI1_PY311"  "$ENV_OAI1_PY311_YML"
+  ensure_env "$ENV_DEFAULT" "$ENV_DEFAULT_YML"
+  ensure_env "$ENV_OAI1"    "$ENV_OAI1_YML"
   if conda activate "$ACTIVATE_ENV" 2>/dev/null; then
     ok "activated conda env: $ACTIVATE_ENV ($(python --version 2>&1))"
   else
@@ -245,7 +259,7 @@ printf '  tier repo : %s\n' "$TIER_REPO"
 printf '  ap repo   : %s\n' "$AP_REPO"
 printf '  flowcept  : %s\n' "$FLOWCEPT_REPO"
 printf '  python    : %s\n' "$(command -v python 2>/dev/null) ($(python --version 2>&1))"
-printf '  conda env : %s (active)   envs: %s, %s, %s\n' "$ACTIVATE_ENV" "$ENV_DEFAULT" "$ENV_OAI1" "$ENV_OAI1_PY311"
+printf '  conda env : %s (active)   envs: %s, %s\n' "$ACTIVATE_ENV" "$ENV_DEFAULT" "$ENV_OAI1"
 printf '  HF_HOME   : %s\n' "$HF_HOME"
 if command -v nvidia-smi >/dev/null 2>&1; then
   printf '  GPU       : %s\n' "$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1)"
