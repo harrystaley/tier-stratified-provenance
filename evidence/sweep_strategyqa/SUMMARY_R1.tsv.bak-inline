@@ -1,5 +1,5 @@
 label	gate	struct_cap	tier_outcome	ASR-r(%)	n
-baseline	0	none	(gate off)	55.2	229
+baseline	0	none	(gate off)	56.8	229
 downweight_none_R1	1	none	T_N(dropped)	0.0	229
 downweight_forge_R1	1	forge	T_N(unforgeable)	0.0	229
-downweight_member_R1	1	member	T_W(residual)	57.4	229
+downweight_member_R1	1	member	T_W(residual)	56.8	229
