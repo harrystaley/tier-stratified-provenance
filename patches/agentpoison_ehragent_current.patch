@@ -1,0 +1,57 @@
+diff --git a/EhrAgent/ehragent/config.py b/EhrAgent/ehragent/config.py
+index d4ef02b..c803bfd 100755
+--- a/EhrAgent/ehragent/config.py
++++ b/EhrAgent/ehragent/config.py
+@@ -1,8 +1,9 @@
++import os
+ def openai_config(model):
+     if model == 'gpt-3.5-turbo-16k-0613':
+         config = {
+-            "model": "gpt-3.5-turbo-16k-0613",
+-            "api_key": "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",
++            "model": "gpt-3.5-turbo",
++            "api_key": os.environ["OPENAI_API_KEY"],
+         }
+     elif model == '<YOUR_OWN_GPT_MODEL_II>':
+         config = {
+diff --git a/EhrAgent/ehragent/eval.py b/EhrAgent/ehragent/eval.py
+index 9bc0608..7cf8473 100755
+--- a/EhrAgent/ehragent/eval.py
++++ b/EhrAgent/ehragent/eval.py
+@@ -1,7 +1,7 @@
+ import json
+ import sys
+ sys.path.append("./")
+-from AgentPoison.utils import load_ehr_memory
++from algo.utils import load_ehr_memory
+ from transformers import BertModel, BertTokenizer
+ import torch
+ from tqdm import tqdm
+diff --git a/EhrAgent/ehragent/main.py b/EhrAgent/ehragent/main.py
+index 2bbc233..7fa6a49 100755
+--- a/EhrAgent/ehragent/main.py
++++ b/EhrAgent/ehragent/main.py
+@@ -88,7 +88,7 @@ def main():
+         attack_or_not = False
+ 
+     ##### Put your trigger tokens here #####
+-    trigger_token_list = ['put', 'your', 'trigger', 'tokens', 'in', 'this', 'list']
++    trigger_token_list = ['lobe', 'caine', 'smiled', 'approaching']
+     print("trigger_token_list", trigger_token_list)
+ 
+     trigger_token_list = [token for token in trigger_token_list if token not in ['[CLS]', '[MASK]', '[SEP]']]
+diff --git a/EhrAgent/ehragent/medagent.py b/EhrAgent/ehragent/medagent.py
+index 02183fc..657768a 100755
+--- a/EhrAgent/ehragent/medagent.py
++++ b/EhrAgent/ehragent/medagent.py
+@@ -10,8 +10,8 @@ from termcolor import colored
+ import Levenshtein
+ import sys
+ sys.path.append("./")
+-from AgentPoison.utils import load_db_ehr, load_models, get_ada_embedding
+-from AgentPoison.config import model_code_to_embedder_name_dsi, model_code_to_embedder_name
++from algo.utils import load_db_ehr, load_models, get_ada_embedding
++from algo.config import model_code_to_embedder_name
+ import torch
+ from tqdm import tqdm
+ import replicate
