@@ -125,21 +125,22 @@ for cell in "${CELLS[@]}"; do
   [ $ok -eq 0 ] && echo "   WARNING: cell $label did not complete after 3 attempts" | tee -a "$log"
 
   # --- ASR-r via AgentPoison eval.py (single source of truth) -----------------
-  # Replaces the former inline retrieval_success>=1 formula. eval.py prints
-  # "ASR-r:  <fraction>"; we parse that line and convert to a one-decimal percent
-  # to match the SUMMARY "ASR-r(%)" column. NOTE: eval.py's ASR-r is the
-  # AgentPoison-repo scorer (asrr_count/overall_retrieval), which is not identical
-  # to the paper's written definition, "fraction of instances where all retrieved
-  # demonstrations are poisoned" [K. Chen et al., "AgentPoison: Red-teaming LLM
-  # Agents via Poisoning Memory or Knowledge Bases," arXiv:2407.12784v1, Sec. 4.1].
-  # Switching scorers changes reported ASR-r relative to the prior inline formula;
-  # regenerate SUMMARY and tab_results_strategyqa.tex after adopting this.
+  # Replaces the former inline retrieval_success>=1 formula. eval.py reads only
+  # --path (verified: single jsonlines.open(args.path)) and prints "ASR-r:  <fraction>".
+  # We parse that line and convert to a one-decimal percent to match the SUMMARY
+  # "ASR-r(%)" column. NOTE: eval.py's ASR-r is the AgentPoison-repo scorer
+  # (asrr_count/overall_retrieval), which is not identical to the paper's written
+  # definition, "fraction of instances where all retrieved demonstrations are
+  # poisoned" [K. Chen et al., "AgentPoison: Red-teaming LLM Agents via Poisoning
+  # Memory or Knowledge Bases," arXiv:2407.12784v1, Sec. 4.1]. Switching scorers
+  # changes reported ASR-r relative to the prior inline formula; regenerate
+  # SUMMARY_R1.tsv and tab_results_strategyqa.tex after adopting this.
   rjson="$outdir/$RUN_JSONL_NAME"
   if [ ! -f "$rjson" ]; then
     asrr="ERR"; n=0
   else
     n="$(grep -c . "$rjson")"
-    eval_out="$(cd "$AGENTPOISON_DIR/ReAct" && python eval.py --path "$rjson" 2>/dev/null)"
+    eval_out="$(python "$AGENTPOISON_DIR/ReAct/eval.py" --path "$rjson" 2>/dev/null)"
     asrr="$(printf '%s\n' "$eval_out" \
       | awk -F'ASR-r:' '/ASR-r:/{gsub(/ /,"",$2); printf "%.1f", $2*100; found=1} END{if(!found) print "ERR"}')"
     [ -z "$asrr" ] && asrr="ERR"
