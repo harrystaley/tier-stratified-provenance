@@ -1,0 +1,7 @@
+Memory loaded:  193
+Not found:  5
+overall_data 100
+ASR-r:  1.0
+ASR-a:  0.09473684210526316
+ASR-t:  0.6526315789473685
+ACC:  0.3894736842105263
