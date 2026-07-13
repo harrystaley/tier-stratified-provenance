@@ -22,7 +22,7 @@
 #   AP_REPO         default $PROJECT_ROOT/AgentPoison
 #   FLOWCEPT_REPO   default $PROJECT_ROOT/flowcept
 #   CONDA_BASE      auto-discovered if unset (see init_conda)
-#   ACTIVATE_ENV    default 'agentpoison' (the env activated at the end)
+#   ACTIVATE_ENV    default 'agentpoison-oai1-py311' (the env activated at the end)
 #   DATA_DIR        default $PROJECT_ROOT      (HF cache, mongo data live under here)
 #   HF_HOME         default $DATA_DIR/hf_cache
 #   GIT_USER_NAME   default unset — set ONLY if git has no global user.name
@@ -69,7 +69,7 @@ PROJECT_ROOT="${PROJECT_ROOT:-$(dirname "$TIER_REPO")}"
 AP_REPO="${AP_REPO:-$PROJECT_ROOT/AgentPoison}"
 FLOWCEPT_REPO="${FLOWCEPT_REPO:-$PROJECT_ROOT/flowcept}"
 DATA_DIR="${DATA_DIR:-$PROJECT_ROOT}"
-ACTIVATE_ENV="${ACTIVATE_ENV:-agentpoison}"
+ACTIVATE_ENV="${ACTIVATE_ENV:-agentpoison-oai1-py311}"
 export HF_HOME="${HF_HOME:-$DATA_DIR/hf_cache}"
 
 # Env names + their definition files (under TIER_REPO/environment/).
