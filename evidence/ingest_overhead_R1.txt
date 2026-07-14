@@ -1,0 +1,11 @@
+loaded 9251 keys from /workspace/AgentPoison/ReAct/database/strategyqa_train_paragraphs.json
+corpus size N = 9251 entries; manifest built.
+
+=== INGEST OVERHEAD (annotate_tier vs baseline) ===
+N entries per pass      : 9251
+baseline pass (mean)    : 0.181 ms  (0.020 us/entry)
+annotated pass (mean)   : 1.957 ms  (0.212 us/entry)
+annotation overhead     : 1.776 ms/pass
+  --> per-entry overhead: 0.192 us/entry
+  --> relative overhead : 983.8% over baseline consolidation
+(mean of 10 reps; warm-up discarded)
