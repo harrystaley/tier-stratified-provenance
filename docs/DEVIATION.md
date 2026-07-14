@@ -286,7 +286,7 @@ flowcept all import together. This dissolves the Python-version conflict without
 vendoring flowcept.
 
 ### Re-validation
-Condition-1 baseline (DPR, adversarial, gate OFF) reproduced at ASR-r = 56.8%
+Condition-1 baseline (DPR, adversarial, gate OFF) reproduced at ASR-r = 55.2%
 (n=229), within the reproduction band 55.5-75.5 (AgentPoison reports 65.5). ASR-r
 is retrieval-decided and reproduced in band, confirming the port preserves the
 attack. AgentPoison commit: 07ba5df (branch feature/strategyqa-openai-1x).

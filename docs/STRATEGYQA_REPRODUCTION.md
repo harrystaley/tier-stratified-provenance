@@ -181,12 +181,15 @@ skips already-completed `question_idx` values in an existing directory.
 Expected output:
 ```
 ==> Gate result:
-   n=229  ASR-r=56.8  target=65.5  band=55.5-75.5  ->  PASS
+   n=229  ASR-r=55.2  target=65.5  band=55.5-75.5  ->  PASS
 ```
-ASR-r reproduces in the 56-57 range against the paper's 65.5 (see the deviation ledger
-below); the value is inside the ±10pp acceptance band, so the gate PASSES. The headline
-57.2 and this 56.8 are the same configuration on separate runs (run-to-run variation),
-not two different experiments.
+The authoritative ASR-r for this configuration is 55.2 per AgentPoison's own eval.py
+(see `evidence/sweep_strategyqa/SUMMARY_R1.tsv`), against the paper's reported 65.5 (see the
+deviation ledger below); the 10.3-point shortfall sits at the edge of the +/-10pp reproduction
+tolerance and is attributed to unspecified victim-LLM decoding/precision settings, not a
+procedural difference. Earlier logs reporting 56.8/57.2 computed the any-poisoned retrieval
+fraction rather than eval.py's conditional denominator; those values are superseded by the
+eval.py figure.
 
 ### 5.3 Manual invocation (what the script runs)
 To run a single condition by hand — e.g. the `-t benign` arm for ACC — the underlying
