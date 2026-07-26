@@ -1,69 +1,62 @@
 ```markdown
 # Tier-Stratified-Provenance
 
+Enhance version control with AI-driven insights and a React UI, supporting C, R, Rust, and JSX projects for efficient code management.
+
 ## Overview
 
-**Tier-Stratified-Provenance** is an advanced project designed to enhance version control systems by integrating a tiered approach to managing and visualizing change provenance in software repositories. It leverages modern AI techniques and cutting-edge technologies to provide intuitive insights and robust management of code evolution, facilitating a more efficient development workflow.
+Tier-Stratified-Provenance is a cutting-edge tool designed to integrate AI-driven insights into traditional version control systems. This project aims to streamline code management across various programming languages, including C, R, Rust, and JSX, by utilizing a user-friendly React-based interface. The tool enhances repository management by providing intelligent insights and stratified provenance tracking, thereby optimizing workflow and collaboration.
 
 ## Features
 
-- **AI-Driven Insights**: Utilize machine learning models to analyze and predict code changes.
-- **Multi-Language Support**: Seamlessly integrates with projects written in C, R, Rust, and JavaScript (JSX/React).
-- **Component-Based Architecture**: Modular design allows for easy extension and customization.
-- **UI Enhancements**: Modern React-based user interface for intuitive interaction.
-- **Version Control Integration**: Deep integration with Git and GitHub for streamlined repository management.
+- **AI-Driven Insights**: Leverage machine learning models to analyze and provide actionable insights on code changes.
+- **Multi-language Support**: Seamlessly manage projects written in C, R, Rust, and JSX.
+- **React UI**: Intuitive interface built with React for easy navigation and efficient management.
+- **Provenance Tracking**: Advanced tracking of code changes and history stratified by tiers for better clarity.
+- **Integration with GitHub**: Directly integrate with GitHub repositories for streamlined version control.
 
 ## Installation
 
-To get started with Tier-Stratified-Provenance, follow these steps:
+To set up Tier-Stratified-Provenance locally, follow these steps:
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/tier-stratified-provenance.git
-   ```
+1. **Clone the repository**:
+    ```bash
+    git clone https://github.com/yourusername/tier-stratified-provenance.git
+    cd tier-stratified-provenance
+    ```
 
-2. Navigate into the project directory:
-   ```bash
-   cd tier-stratified-provenance
-   ```
+2. **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-3. Install necessary dependencies (assuming Node.js and npm are installed):
-   ```bash
-   npm install
-   ```
+3. **Run the application**:
+    ```bash
+    npm start
+    ```
 
-4. Build the project:
-   ```bash
-   npm run build
-   ```
-
-5. Start the application:
-   ```bash
-   npm start
-   ```
+4. **Access the application**: Open your web browser and navigate to `http://localhost:3000`.
 
 ## Usage
 
-Once the application is running, you can start using its features:
+After setting up the application, you can start using the React UI to manage your code repositories. Here are some basic usage examples:
 
-- **Analyze Repository**: Upload or link a repository to begin analysis.
-- **View Change Provenance**: Access detailed visualizations of code changes over time.
-- **Predict Changes**: Use AI models to predict future code modifications.
+- **Analyze Code Changes**: Navigate to the 'Insights' tab to view AI-generated suggestions and analysis of recent code changes.
+- **Manage Repositories**: Use the 'Repositories' section to add, remove, or update your GitHub repositories.
+- **Track Provenance**: Visit the 'Provenance' page to see a detailed history of code changes stratified by different tiers.
 
-## Contribution Guidelines
+## Contribution
 
 We welcome contributions from the community! To contribute:
 
 1. Fork the repository.
-2. Create a new branch for your feature or bugfix.
-3. Commit your changes with clear and concise messages.
-4. Submit a pull request detailing your changes.
+2. Create a new branch for your feature or bug fix.
+3. Make your changes and commit them with clear messages.
+4. Open a pull request to the `main` branch with a description of your changes.
 
-Please ensure your contributions align with the project's coding standards and pass all tests.
+Please ensure your contributions adhere to the project's coding standards and include relevant tests.
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 ```
-
-Feel free to modify the sections as needed to fit the specific details or requirements of your project.
